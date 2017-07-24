@@ -38,7 +38,7 @@ key: (
 
 ### Strings
 
-Strings that do not contain any whitespace (as recognized by UTF8) and do not start with a digit or reserved character can omit quotation marks;
+Strings that do not contain any whitespace (as recognized by UTF8) and do not start with a digit or contain reserved character can omit quotation marks;
 
 ```
 HelloWorld
@@ -55,7 +55,7 @@ If any of the reserved characters is present, the string must be wrapped with qu
 
 Strings are multi-line by default, if you want to trim leading whitespace from each line and the beginning of the string, prepend a `@` symbol.
 
-```bash
+```
 @"
 Hello 
  World"
@@ -78,7 +78,7 @@ Multiline Comments are wrapped in standard C multline comment slashes. `/* comme
 
 Numbers are divided into integers and floats with no predefined precision.
 
-Integers must be noted as digits in full.
+Integers must be noted as digits in full, leading digits may be used. `0x`, `0o` and `0b` are used for hexadecimal, octal and binary notation respectively.
 
 Floats can be noted in normal decimal notation, exponent notation or scientific notation:
 
@@ -96,7 +96,7 @@ The item after a map key is added to the current Map-List as a Map item. If an i
 
 The top level of a SECL file is considered a Map-List. A new Map-List is started by a parenthesis and must be terminated by one:
 
-```bash
+```
 outmost-map
 
 (
@@ -105,6 +105,10 @@ outmost-map
 ```
 
 The keywords `empty` and `nothing` are equivalent to `()` for readability
+
+Internally, there is no difference between an list (also known as array) and a map, both use the same datatype and list elements can be mixed into dictionary entries.
+
+Lists **must** be sorted exactly in the order that is observed in the input file. The list resulting from `(a b c)` **must** have `a` as first element and `c` as last. 
 
 ### Booleans
 
