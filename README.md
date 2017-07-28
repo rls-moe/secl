@@ -20,7 +20,7 @@ key: (
         "scientific notation": 9*10^22
         "multi-line strings": "
             HELLO WORLD!"
-        "omit quotation around simple strings": Hello-Again!
+        "omit quotation around simple strings": Hello-Again
         "load other files from subfolders": !(loadd "folder" ".conf")
         "empty maps": empty
         
@@ -33,6 +33,18 @@ key: (
     )
 )
 ```
+
+## Project Status
+
+SECL is considered in Version 0.9
+
+Most features are now part of the authorative implementation in this repository.
+
+Missing features:
+  
+  * Hex, Octal and Binary Notation ("0x1F", "0o777", "0b110101")
+  * Float E and Scientific Notation ("2.3e18" or "2.3*10^18")
+  * Function Execution (Functions are recognized but not executed)
 
 ## Introduction
 
@@ -47,7 +59,8 @@ HelloWorld
 
 Reserved characters: `"!@:()`
 
-If any of the reserved characters is present, the string must be wrapped with quotation marks.
+If any of the reserved characters is present, the string must be wrapped with quotation marks. Additionally, if the string equals
+a keyword or function name, it must be wrapped with quotation marks too. (ex. "false" or "empty" or "randstr256")
 
 ```
 "Hello World"
