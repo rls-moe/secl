@@ -1,11 +1,11 @@
 package phase3
 
 import (
-	"testing"
-	"go.rls.moe/secl/parser/phase1"
 	"go.rls.moe/secl/lexer"
+	"go.rls.moe/secl/parser/phase1"
 	"go.rls.moe/secl/parser/phase2"
 	"go.rls.moe/secl/types"
+	"testing"
 )
 
 func TestPhase3Fold(t *testing.T) {
@@ -14,20 +14,20 @@ func TestPhase3Fold(t *testing.T) {
 	p1 := phase1.NewParser(lexer.NewTokenizer(input))
 
 	if err := p1.Run(); err != nil {
-		t.Fatalf("Error in Phase1: ", err)
+		t.Fatal("Error in Phase1: ", err)
 	}
 
-	p := phase2.NewP2Parser(p1.Output())
+	p := phase2.NewParser(p1.Output())
 
 	err := p.Compact()
 	if err != nil {
 		t.Fatalf("Error in step: %s", err)
 	}
 
-	out := p.OutputAST
+	out := p.Output()
 
 	if err := Fold(out); err != nil {
-		t.Fatalf("Error on fold: ", err)
+		t.Fatal("Error on fold: ", err)
 	}
 
 	t.Logf("Output: %s", types.PrintValue(out))

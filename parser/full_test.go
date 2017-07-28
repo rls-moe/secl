@@ -1,10 +1,10 @@
 package parser
 
 import (
-	"testing"
-	"go.rls.moe/secl/types"
 	assert "github.com/stretchr/testify/assert"
+	"go.rls.moe/secl/types"
 	"math/big"
+	"testing"
 )
 
 func TestParseString(t *testing.T) {
@@ -25,36 +25,36 @@ func TestParseString(t *testing.T) {
 		List: []types.Value{
 			&types.MapList{
 				Map: map[types.String]types.Value{
-					types.String{"test1"}: &types.MapList{
+					types.String{Value: "test1"}: &types.MapList{
 						Map: map[types.String]types.Value{
-							types.String{"test2"}: &types.MapList{Map: map[types.String]types.Value{}, List:[]types.Value{}},
-							types.String{"test3"}: &types.MapList{Map: map[types.String]types.Value{}, List:[]types.Value{}},
-							types.String{"test5"}: &types.String{"hallo welt"},
+							types.String{Value: "test2"}: &types.MapList{Map: map[types.String]types.Value{}, List: []types.Value{}},
+							types.String{Value: "test3"}: &types.MapList{Map: map[types.String]types.Value{}, List: []types.Value{}},
+							types.String{Value: "test5"}: &types.String{Value: "hallo welt"},
 						},
 						List: []types.Value{
-							&types.String{"hello"},
-							&types.Bool{true},
+							&types.String{Value: "hello"},
+							&types.Bool{Value: true},
 							&types.MapList{
 								Executable: true,
-								Map: map[types.String]types.Value{},
+								Map:        map[types.String]types.Value{},
 								List: []types.Value{
-									&types.Function{Identifier:"nop"},
+									&types.Function{Identifier: "nop"},
 								},
 							},
-							&types.Integer{big.NewInt(88)},
-							&types.Float{big.NewFloat(99.1)},
-							&types.Integer{big.NewInt(-88)},
-							&types.Integer{big.NewInt(+88)},
-							&types.Float{big.NewFloat(-99.1)},
-							&types.Float{big.NewFloat(+99.1)},
+							&types.Integer{Value: big.NewInt(88)},
+							&types.Float{Value: big.NewFloat(99.1)},
+							&types.Integer{Value: big.NewInt(-88)},
+							&types.Integer{Value: big.NewInt(+88)},
+							&types.Float{Value: big.NewFloat(-99.1)},
+							&types.Float{Value: big.NewFloat(+99.1)},
 						},
 					},
 				},
 				List: []types.Value{
-					&types.Bool{false}, &types.Bool{false},&types.Bool{false}, &types.Bool{false},
-					&types.Bool{true},&types.Bool{true},&types.Bool{true},&types.Bool{true},
+					&types.Bool{Value: false}, &types.Bool{Value: false}, &types.Bool{Value: false}, &types.Bool{Value: false},
+					&types.Bool{Value: true}, &types.Bool{Value: true}, &types.Bool{Value: true}, &types.Bool{Value: true},
 				},
 			},
 		},
-	},*output)
+	}, *output)
 }

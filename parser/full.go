@@ -1,14 +1,15 @@
-package parser
+package parser // import "go.rls.moe/secl/parser"
 
 import (
-	"go.rls.moe/secl/types"
+	"github.com/pkg/errors"
 	"go.rls.moe/secl/lexer"
 	"go.rls.moe/secl/parser/phase1"
 	"go.rls.moe/secl/parser/phase2"
 	"go.rls.moe/secl/parser/phase3"
-	"github.com/pkg/errors"
+	"go.rls.moe/secl/types"
 )
 
+// ParseString will parse a serialized configuration in SECL syntax into a MapList
 func ParseString(input string) (*types.MapList, error) {
 	p1 := phase1.NewParser(lexer.NewTokenizer(input))
 
@@ -16,17 +17,18 @@ func ParseString(input string) (*types.MapList, error) {
 		return nil, errors.Wrap(err, "Error in Phase 1")
 	}
 
-	p2 := phase2.NewP2Parser(p1.Output())
+	p2 := phase2.NewParser(p1.Output())
 
 	if err := p2.Compact(); err != nil {
 		return nil, errors.Wrap(err, "Error in Phase 2")
 	}
 
-	if err := phase3.Fold(p2.OutputAST); err != nil {
+	ast := p2.Output()
+	if err := phase3.Fold(ast); err != nil {
 		return nil, errors.Wrap(err, "Error in Phase 3")
 	}
 
-	phase3.Clean(p2.OutputAST)
+	phase3.Clean(ast)
 
-	return p2.OutputAST, nil
+	return ast, nil
 }

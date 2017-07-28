@@ -1,29 +1,60 @@
-package phase1
+package phase1 // import "go.rls.moe/secl/parser/phase1"
 
 import (
-	"go.rls.moe/secl/types"
-	"go.rls.moe/secl/lexer"
 	"github.com/pkg/errors"
+	"go.rls.moe/secl/helper"
+	"go.rls.moe/secl/lexer"
+	"go.rls.moe/secl/types"
 	"io"
-	"math/rand"
+	"strings"
 )
 
-type AST *RootNode
+// AST is a shorthand for *rootNode, an internal type, which is exported here
+type AST rootNode
 
+// SubAST returns a subset of the AST, starting at <start> and going to <end> as if the notation a.FlatNodes[<start>:<end>]
+// was used. If start or end are -1, they are not inserted. Ex: start=-1 => a.FlatNodes[:<end>]
+func (a *AST) SubAST(start, end int) *AST {
+	var p AST
+	if end != -1 && start != -1 {
+		p = AST(rootNode{
+			FlatNodes: a.FlatNodes[start:end],
+		})
+	} else if end != -1 && start == -1 {
+		p = AST(rootNode{
+			FlatNodes: a.FlatNodes[:end],
+		})
+	} else if end == -1 && start != -1 {
+		p = AST(rootNode{
+			FlatNodes: a.FlatNodes[start:],
+		})
+	} else {
+		p = AST(rootNode{
+			FlatNodes: a.FlatNodes[:],
+		})
+	}
+	return &p
+}
+
+// Parser is a Phase 1 parser instance
 type Parser struct {
-	FlatAST *RootNode
+	// FlatAST is the root node of the phase 1, a flat abstract syntax list
+	FlatAST *rootNode
+	// Tokenizer is the lexer to read from
 	Tokenizer *lexer.Tokenizer
 }
 
+// NewParser generates a new Phase 1 parser instance from the given lexer
 func NewParser(t *lexer.Tokenizer) *Parser {
 	return &Parser{
-		FlatAST: &RootNode{
+		FlatAST: &rootNode{
 			FlatNodes: []types.Value{},
 		},
 		Tokenizer: t,
 	}
 }
 
+// Run will step through the parser until a io.EOF is encountered from a single step
 func (p *Parser) Run() error {
 	for {
 		if err := p.Step(); err == io.EOF {
@@ -39,46 +70,49 @@ func (p *Parser) Step() error {
 	tok := p.Tokenizer.NextToken()
 
 	switch tok.Type {
-	case lexer.TT_bool:
+	case lexer.TTBool:
 		b := &types.Bool{}
 		if tok.Literal == "true" || tok.Literal == "on" || tok.Literal == "allow" || tok.Literal == "yes" {
 			b.Value = true
 		} else if tok.Literal == "false" || tok.Literal == "off" || tok.Literal == "deny" || tok.Literal == "no" {
 			b.Value = false
 		} else if tok.Literal == "maybe" {
-			b.Value = rand.Float64() > 0.501
+			print(helper.RndFloat())
+			b.Value = helper.RndFloat() > 0.501
 		} else {
 			return errors.Errorf("Wanted a boolean value but got %q, %+v", tok.Literal, tok)
 		}
 		p.FlatAST.Append(b)
-	case lexer.TT_empty:
+	case lexer.TTEmpty:
 		p.FlatAST.Append(&EmptyMap{})
-	case lexer.TT_mapListBegin:
+	case lexer.TTNil:
+		p.FlatAST.Append(&types.Nil{})
+	case lexer.TTMapListBegin:
 		p.FlatAST.Append(&MapBegin{})
-	case lexer.TT_mapListEnd:
+	case lexer.TTMapListEnd:
 		p.FlatAST.Append(&MapEnd{})
-	case lexer.TT_string:
+	case lexer.TTString:
 		p.FlatAST.Append(&types.String{
 			Value: tok.Literal,
 		})
-	case lexer.TT_singleWordString:
+	case lexer.TTSingleWordString:
 		p.FlatAST.Append(&types.String{
 			Value: tok.Literal,
 		})
-	case lexer.TT_mod_execMap:
+	case lexer.TTModExecMap:
 		p.FlatAST.Append(&ExecMap{})
-	case lexer.TT_function:
+	case lexer.TTFunction:
 		p.FlatAST.Append(&types.Function{
 			Identifier: tok.Literal,
 		})
-	case lexer.TT_number:
+	case lexer.TTNumber:
 		val, err := ConvertNumber(tok.Literal)
 		if err != nil {
 			return errors.Wrapf(err, "Could not convert token %q at position %d-%d",
 				tok.Literal, tok.Start, tok.End)
 		}
 		p.FlatAST.Append(val)
-	case lexer.TT_mod_mapKey:
+	case lexer.TTModMapKey:
 		if err := p.FlatAST.ReplaceLast(func(in types.Value) (types.Value, error) {
 			if in.Type() != types.TString {
 				return nil, errors.New("Wanted string AST node")
@@ -90,7 +124,21 @@ func (p *Parser) Step() error {
 		}); err != nil {
 			return errors.Wrap(err, "Could not replace value")
 		}
-	case lexer.TT_eof:
+	case lexer.TTRandstr:
+		var length = 42
+		if strings.HasSuffix(tok.Literal, "32") {
+			length = 32
+		} else if strings.HasSuffix(tok.Literal, "64") {
+			length = 64
+		} else if strings.HasSuffix(tok.Literal, "128") {
+			length = 64
+		} else if strings.HasSuffix(tok.Literal, "256") {
+			length = 64
+		}
+		p.FlatAST.Append(&types.String{
+			Value: helper.RndStr(length),
+		})
+	case lexer.TTEOF:
 		return io.EOF
 	default:
 		return errors.Errorf("Unknown Token %s: %+v", tok.Type, tok)
@@ -98,6 +146,13 @@ func (p *Parser) Step() error {
 	return nil
 }
 
-func (p *Parser) Output() AST {
-	return AST(p.FlatAST)
+// Output returns the Phase 1 AST
+//
+// In this phase, the AST is purely flat and not an actual tree, it's more a ASL, Abstract Syntax List
+//
+// However, this step is mainly concerned with parsing the tokens into the correct types or preparing them
+// for the next phases
+func (p *Parser) Output() *AST {
+	q := (*AST)(p.FlatAST)
+	return q
 }

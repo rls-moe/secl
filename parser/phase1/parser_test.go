@@ -1,9 +1,9 @@
 package phase1
 
 import (
-	"testing"
 	"go.rls.moe/secl/lexer"
 	"io"
+	"testing"
 )
 
 func TestPhase1Parser_Step(t *testing.T) {
@@ -14,7 +14,7 @@ func TestPhase1Parser_Step(t *testing.T) {
 	for {
 		err := p.Step()
 		if err != nil && err != io.EOF {
-			t.Fatalf("Error in step: ", err)
+			t.Fatal("Error in step: ", err)
 		}
 		if err == io.EOF {
 			break

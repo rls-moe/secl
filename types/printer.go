@@ -1,7 +1,9 @@
-package types
+package types // import "go.rls.moe/secl/types"
 
+// PrintValue will print out a debug string of a given Value. This string is not parsable but usuable for
+// human consumption.
 func PrintValue(p Value) string {
-	switch p.Type(){
+	switch p.Type() {
 	case TMapList:
 		q := p.(*MapList)
 		var out = "( "

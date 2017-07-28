@@ -42,8 +42,8 @@ Most features are now part of the authorative implementation in this repository.
 
 Missing features:
   
-  * Hex, Octal and Binary Notation ("0x1F", "0o777", "0b110101")
-  * Float E and Scientific Notation ("2.3e18" or "2.3*10^18")
+  * Hex, Octal and Binary Notation (`0x1F`, `0o777`, `0b110101`)
+  * Float E and Scientific Notation (`2.3e18` or `2.3*10^18`)
   * Function Execution (Functions are recognized but not executed)
 
 ## Introduction

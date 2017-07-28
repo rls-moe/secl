@@ -1,4 +1,4 @@
-package phase2
+package phase2 // import "go.rls.moe/secl/parser/phase2"
 
 import (
 	"github.com/pkg/errors"
@@ -7,94 +7,108 @@ import (
 )
 
 var (
+	// ErrUnbalanced is returned when a map is not properly closed
 	ErrUnbalanced = errors.New("Did not find balanced map in parse")
+	// ErrUnexpectedEndOfList is returned when a end of list is not expected
 	ErrUnexpectedEndOfList = errors.New("Did not expect an end of list")
 )
 
+// Parser is a phase-2 parser. It turns a flat AST (or ASL) into a proper tree, folding values between two map key markers (MapBegin and MapEnd) into
+// maps recursively
+// It does not yet insert key-value pairs and does not perform cleanups.
 type Parser struct {
-	OutputAST *types.MapList
-	Input     phase1.AST
+	outputAST *types.MapList
+	input     *phase1.AST
 }
 
-type SubParser struct {
+type subParser struct {
 	*Parser
-	Depth, Start, End int
+	depth, start, end int
 }
 
-func NewP2Parser(in phase1.AST) *Parser {
+// NewParser creates a new Phase 2 parser using the given flat AST from Phase 1
+func NewParser(in *phase1.AST) *Parser {
 	return &Parser{
-		OutputAST: &types.MapList{
+		outputAST: &types.MapList{
 			List: []types.Value{},
 			Map:  map[types.String]types.Value{},
 		},
-		Input: in,
+		input: in,
 	}
 }
 
+// Compact will transform the ASL into a AST, using the steps outlined by the documentation on the phase2.Parser struct
 func (p *Parser) Compact() error {
-	for x := 0; x < len(p.Input.FlatNodes); x++ {
-		curNode := p.Input.FlatNodes[x]
+	for x := 0; x < len(p.input.FlatNodes); x++ {
+		curNode := p.input.FlatNodes[x]
 
 		if curNode.Type() == phase1.TMapBegin {
-			sp := p.Subparser(1, x + 1)
-			if steps, err := sp.Compact(0); err != nil {
+			sp := p.subparser(1, x+1)
+			var steps int
+			var err error
+			if steps, err = sp.compact(0); err != nil {
 				return err
-			} else {
-				x += steps+1
-				p.OutputAST.List = append(p.OutputAST.List, sp.OutputAST)
 			}
+			x += steps + 1
+			p.outputAST.List = append(p.outputAST.List, sp.outputAST)
 		} else if curNode.Type() == phase1.TMapEnd {
 			return ErrUnexpectedEndOfList
 		} else if curNode.Type() == phase1.TMapEmpty {
-			p.OutputAST.List = append(p.OutputAST.List, &types.MapList{
-				Map: map[types.String]types.Value{},
+			p.outputAST.List = append(p.outputAST.List, &types.MapList{
+				Map:  map[types.String]types.Value{},
 				List: []types.Value{},
 			})
 		} else {
-			p.OutputAST.List = append(p.OutputAST.List, curNode)
+			p.outputAST.List = append(p.outputAST.List, curNode)
 		}
 	}
 
 	return nil
 }
 
-func (p *Parser) Subparser(depth, start int) *SubParser {
-	return &SubParser{
-		Parser: &Parser{OutputAST: &types.MapList{
+// Output returns a types.MapList
+//
+// While this maplist may already be usable, it has not been passed through phase 3 yet so it is completely flat
+// and may not be fully expanded yet. Internal types may be present.
+func (p *Parser) Output() *types.MapList {
+	return p.outputAST
+}
+
+func (p *Parser) subparser(depth, start int) *subParser {
+	return &subParser{
+		Parser: &Parser{outputAST: &types.MapList{
 			List: []types.Value{},
 			Map:  map[types.String]types.Value{},
 		},
-			Input: &phase1.RootNode{
-				p.Input.FlatNodes[start:],
-			},
+			input: p.input.SubAST(start, -1),
 		},
-		Start: start,
-		Depth: depth,
+		start: start,
+		depth: depth,
 	}
 }
 
-
-func (p *SubParser) Compact(depth int) (int, error) {
-	for x := 0; x < len(p.Input.FlatNodes); x++ {
-		curNode := p.Input.FlatNodes[x]
+func (p *subParser) compact(depth int) (int, error) {
+	for x := 0; x < len(p.input.FlatNodes); x++ {
+		curNode := p.input.FlatNodes[x]
 
 		if curNode.Type() == phase1.TMapBegin {
-			sp := p.Subparser(depth +1, x + 1)
-			if steps, err := sp.Compact(depth + 1); err != nil {
+			sp := p.subparser(depth+1, x+1)
+			var steps int
+			var err error
+			if steps, err = sp.compact(depth + 1); err != nil {
 				return 0, err
-			} else {
-				x += steps+1
-				p.OutputAST.List = append(p.OutputAST.List, sp.OutputAST)
 			}
+			x += steps + 1
+			p.outputAST.List = append(p.outputAST.List, sp.outputAST)
 		} else if curNode.Type() == phase1.TMapEnd {
 			return x, nil
 		} else if curNode.Type() == phase1.TMapEmpty {
-			p.OutputAST.List = append(p.OutputAST.List, &types.MapList{
-				Map: map[types.String]types.Value{},
+			p.outputAST.List = append(p.outputAST.List, &types.MapList{
+				Map:  map[types.String]types.Value{},
 				List: []types.Value{},
 			})
 		} else {
-			p.OutputAST.List = append(p.OutputAST.List, curNode)
+			p.outputAST.List = append(p.outputAST.List, curNode)
 		}
 	}
 
