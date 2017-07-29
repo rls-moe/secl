@@ -1,0 +1,25 @@
+list-entry
+
+key: (
+    another-list-entry
+    key: "Hello World!"
+    explicit: "UTF-8 support: 💩"
+
+    other-features: (
+        "arbitrary precision decimals": 29312345320423531230497123416079652.234234234
+        "and integers": 343287640123745610476123012734613047236402374620376234023746
+        "scientific notation": 9.0*10^22
+        "multi-line strings": "
+            HELLO WORLD!"
+        "omit quotation around simple strings": Hello-Again
+        "load other files from subfolders": !(loadd "folder" ".conf")
+        "empty maps": empty
+
+        "random values": (
+            randstr128
+            maybe
+        )
+
+        "mix lists and maps, they are the same in SECL"
+    )
+)

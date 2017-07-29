@@ -17,7 +17,7 @@ key: (
     other-features: (
         "arbitrary precision decimals": 29312345320423531230497123416079652.234234234
         "and integers": 343287640123745610476123012734613047236402374620376234023746
-        "scientific notation": 9*10^22
+        "scientific notation": 9.0*10^22
         "multi-line strings": "
             HELLO WORLD!"
         "omit quotation around simple strings": Hello-Again

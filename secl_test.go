@@ -5,6 +5,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.rls.moe/secl/types"
 	"math/big"
+	"io/ioutil"
+	"github.com/stretchr/testify/require"
+	"path/filepath"
 )
 
 func TestParseBytes(t *testing.T) {
@@ -21,7 +24,7 @@ func TestParseBytes(t *testing.T) {
 	dmp := mapList.List[0].(*types.MapList)
 
 	assert.Len(dmp.Map, 1)
-	assert.EqualValues(&types.String{Value: "world"}, dmp.Map[types.String{Value:"hellO"}])
+	assert.EqualValues(types.String{Value: "world"}, dmp.Map[types.String{Value:"hellO"}])
 	assert.Len(dmp.List, 1)
 	assert.EqualValues(&types.Bool{Value: false}, dmp.List[0])
 }
@@ -40,7 +43,21 @@ func TestParseString(t *testing.T) {
 	dmp := mapList.List[0].(*types.MapList)
 
 	assert.Len(dmp.Map, 1)
-	assert.EqualValues(&types.String{Value: "world"}, dmp.Map[types.String{Value:"hellO"}])
+	assert.EqualValues(types.String{Value: "world"}, dmp.Map[types.String{Value:"hellO"}])
 	assert.Len(dmp.List, 1)
 	assert.EqualValues(&types.Bool{Value: false}, dmp.List[0])
+}
+
+func TestMustParse(t *testing.T) {
+	assert := require.New(t)
+	files, err := ioutil.ReadDir("./tests/must-parse")
+	assert.NoError(err, "Must read test directory")
+	for _, file := range files {
+		t.Logf("Running test %s", file.Name())
+		fp := filepath.Join("./tests/must-parse", file.Name())
+		data, err := ioutil.ReadFile(fp)
+		assert.NoError(err, "Must read test file")
+		_, err = ParseBytes(data)
+		assert.NoError(err, "Must parse without error")
+	}
 }

@@ -21,7 +21,7 @@ type String struct {
 	Value string
 }
 
-var _ Value = &String{} // Assert that String is a Value
+var _ Value = String{} // Assert that String is a Value
 
 // Bool is either true or false
 type Bool struct {
@@ -58,9 +58,9 @@ type Function struct {
 	Identifier string
 }
 
-var _ Value = &Function{} // Assert that Function is a Value
+var _ Value = Function{} // Assert that Function is a Value
 
 // Nil represents a null value, it doesn't have any actual value behind it
 type Nil struct{}
 
-var _ Value = &Nil{} // Assert that Nil is a Value
+var _ Value = Nil{} // Assert that Nil is a Value

@@ -1,12 +1,12 @@
 package types // import "go.rls.moe/secl/types"
 
 // Literal returns the raw string value of the entity
-func (s *String) Literal() string {
+func (s String) Literal() string {
 	return s.Value
 }
 
 // Type returns TString
-func (*String) Type() Type {
+func (String) Type() Type {
 	return TString
 }
 
@@ -54,21 +54,21 @@ func (*MapList) Type() Type {
 }
 
 // Literal returns "func:" and the function identifier
-func (f *Function) Literal() string {
+func (f Function) Literal() string {
 	return "func:" + f.Identifier
 }
 
 // Type returns TFunction
-func (*Function) Type() Type {
+func (Function) Type() Type {
 	return TFunction
 }
 
 // Literal returns "nil"
-func (*Nil) Literal() string {
+func (Nil) Literal() string {
 	return "nil"
 }
 
 // Type returns TNil
-func (*Nil) Type() Type {
+func (Nil) Type() Type {
 	return TNil
 }

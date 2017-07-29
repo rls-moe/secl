@@ -84,25 +84,25 @@ func (p *Parser) Step() error {
 		}
 		p.FlatAST.Append(b)
 	case lexer.TTEmpty:
-		p.FlatAST.Append(&EmptyMap{})
+		p.FlatAST.Append(EmptyMap{})
 	case lexer.TTNil:
-		p.FlatAST.Append(&types.Nil{})
+		p.FlatAST.Append(types.Nil{})
 	case lexer.TTMapListBegin:
-		p.FlatAST.Append(&MapBegin{})
+		p.FlatAST.Append(MapBegin{})
 	case lexer.TTMapListEnd:
-		p.FlatAST.Append(&MapEnd{})
+		p.FlatAST.Append(MapEnd{})
 	case lexer.TTString:
-		p.FlatAST.Append(&types.String{
+		p.FlatAST.Append(types.String{
 			Value: tok.Literal,
 		})
 	case lexer.TTSingleWordString:
-		p.FlatAST.Append(&types.String{
+		p.FlatAST.Append(types.String{
 			Value: tok.Literal,
 		})
 	case lexer.TTModExecMap:
-		p.FlatAST.Append(&ExecMap{})
+		p.FlatAST.Append(ExecMap{})
 	case lexer.TTFunction:
-		p.FlatAST.Append(&types.Function{
+		p.FlatAST.Append(types.Function{
 			Identifier: tok.Literal,
 		})
 	case lexer.TTNumber:
@@ -117,7 +117,7 @@ func (p *Parser) Step() error {
 			if in.Type() != types.TString {
 				return nil, errors.New("Wanted string AST node")
 			}
-			str := in.(*types.String)
+			str := in.(types.String)
 			return &MapKey{
 				Value: str.Value,
 			}, nil
@@ -135,7 +135,7 @@ func (p *Parser) Step() error {
 		} else if strings.HasSuffix(tok.Literal, "256") {
 			length = 64
 		}
-		p.FlatAST.Append(&types.String{
+		p.FlatAST.Append(types.String{
 			Value: helper.RndStr(length),
 		})
 	case lexer.TTEOF:
