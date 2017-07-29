@@ -77,7 +77,6 @@ func (p *Parser) Step() error {
 		} else if tok.Literal == "false" || tok.Literal == "off" || tok.Literal == "deny" || tok.Literal == "no" {
 			b.Value = false
 		} else if tok.Literal == "maybe" {
-			print(helper.RndFloat())
 			b.Value = helper.RndFloat() > 0.501
 		} else {
 			return errors.Errorf("Wanted a boolean value but got %q, %+v", tok.Literal, tok)

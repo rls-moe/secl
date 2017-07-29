@@ -57,7 +57,8 @@ func TestMustParse(t *testing.T) {
 		fp := filepath.Join("./tests/must-parse", file.Name())
 		data, err := ioutil.ReadFile(fp)
 		assert.NoError(err, "Must read test file")
-		_, err = ParseBytes(data)
+		ml, err := ParseBytes(data)
 		assert.NoError(err, "Must parse without error")
+		t.Logf("Output of test %s:\n%s", file.Name(), types.PrintValue(ml))
 	}
 }

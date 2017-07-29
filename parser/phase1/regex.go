@@ -13,7 +13,7 @@ var (
 	regexIntegerOct     = regexp.MustCompile(`^[+-]?0o[0-7]+$`)
 	regexIntegerBin     = regexp.MustCompile(`^[+-]?0b[01]+$`)
 	regexFloatDecimal   = regexp.MustCompile(`^[+-]?\d+.\d+$`)
-	regexFloatSci       = regexp.MustCompile(`^[+-]?\d+.\d+\*10\^[+-]?\d{1,3}$`)
+	regexFloatSci       = regexp.MustCompile(`^([+-]?)(\d+.\d+)\*10\^([+-]?)(\d{1,3})$`)
 	regexFloatExp       = regexp.MustCompile(`^[+-]?\d+.\d+e[+-]?\d{1,3}$`)
 )
 
@@ -41,7 +41,29 @@ func ConvertNumber(lit string) (types.Value, error) {
 	} else if regexIntegerBin.MatchString(lit) {
 		return nil, errors.New("Binary Numbers not implemented")
 	} else if regexFloatSci.MatchString(lit) {
-		return nil, errors.New("Scientific Floats not implemented")
+		matches := regexFloatSci.FindStringSubmatch(lit)
+		fpv := big.NewFloat(0.0)
+		_, ok := fpv.SetString(matches[2])
+		if !ok {
+			return nil, errors.New("Could not parse Numeric Value")
+		}
+		if matches[1] == "-" {
+			fpv.Mul(fpv, big.NewFloat(-1.0))
+		}
+		fpe := big.NewInt(0.0)
+		_, ok = fpe.SetString(matches[4], 10)
+		if !ok {
+			return nil, errors.New("Could not parse Exponent Value")
+		}
+		if matches[3] == "-" {
+			fpe.Mul(fpe, big.NewInt(-1))
+		}
+		fpev := big.NewFloat(1.0)
+		for fpe.Uint64() > 0 {
+			fpev.Mul(fpev, big.NewFloat(10.0))
+			fpe.Sub(fpe, big.NewInt(1))
+		}
+		return &types.Float{Value:fpv.Mul(fpv, fpev)}, nil
 	} else if regexFloatExp.MatchString(lit) {
 		return nil, errors.New("Exp Floats not implemented")
 	}
