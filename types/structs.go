@@ -16,8 +16,34 @@ const (
 	TNil           = "NIL"
 )
 
+type Randomized struct {
+	Random bool
+}
+
+func (r Randomized) IsRandom() bool {
+	return r.Random
+}
+
+type IRandomized interface {
+	IsRandom() bool
+}
+
+type PositionInformation struct {
+	Start, End int
+}
+
+func (p PositionInformation) Position() (int, int) {
+	return p.Start, p.End
+}
+
+type IPositionInformation interface {
+	Position() (int, int)
+}
+
 // String is a text value
 type String struct {
+	Randomized
+	PositionInformation
 	Value string
 }
 
@@ -25,6 +51,8 @@ var _ Value = String{} // Assert that String is a Value
 
 // Bool is either true or false
 type Bool struct {
+	Randomized
+	PositionInformation
 	Value bool
 }
 

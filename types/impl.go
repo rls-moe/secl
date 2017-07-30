@@ -55,7 +55,7 @@ func (*MapList) Type() Type {
 
 // Literal returns "func:" and the function identifier
 func (f Function) Literal() string {
-	return "func:" + f.Identifier
+	return f.Identifier
 }
 
 // Type returns TFunction

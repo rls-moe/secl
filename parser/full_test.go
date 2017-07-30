@@ -1,15 +1,15 @@
 package parser
 
 import (
-//	assert "github.com/stretchr/testify/assert"
 	"go.rls.moe/secl/types"
-//	"math/big"
+	"math/big"
 	"testing"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParseString(t *testing.T) {
 
-	input := "(test1:( hello test2: () test3: empty true test5: \"hallo welt\" !(nop) 88 99.1 -88 +088 -99.1 +099.1 ) off false deny no on true allow yes) "
+	input := "(test1:( hello test2: () test3: empty true test5: \"hallo welt\" !(nop) 88 99.1 -88 +088 -99.1 +099.1 ) off false deny no on true allow yes nil) "
 
 	output, err := ParseString(input)
 	if err != nil {
@@ -17,12 +17,9 @@ func TestParseString(t *testing.T) {
 	}
 
 	t.Logf("Output: %s", types.PrintValue(output))
+	assert := assert.New(t)
 
-	// Assertify does not properly compare the MapList type so this test is only a "no error returned" test
-	// When changing the parser, uncomment this test and run it to check that the resulting diff is empty or non-relevant.
-	/*assert := assert.New(t)
-
-	assert.Equal(types.MapList{
+	assert.Equal(types.PrintDebug(&types.MapList{
 		Map: map[types.String]types.Value{},
 		List: []types.Value{
 			&types.MapList{
@@ -55,8 +52,9 @@ func TestParseString(t *testing.T) {
 				List: []types.Value{
 					&types.Bool{Value: false}, &types.Bool{Value: false}, &types.Bool{Value: false}, &types.Bool{Value: false},
 					&types.Bool{Value: true}, &types.Bool{Value: true}, &types.Bool{Value: true}, &types.Bool{Value: true},
+					&types.Nil{},
 				},
 			},
 		},
-	}, *output)*/
+	}), types.PrintDebug(output))
 }

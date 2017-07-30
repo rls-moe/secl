@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"github.com/stretchr/testify/require"
 	"path/filepath"
+	"strings"
 )
 
 func TestParseBytes(t *testing.T) {
@@ -24,9 +25,9 @@ func TestParseBytes(t *testing.T) {
 	dmp := mapList.List[0].(*types.MapList)
 
 	assert.Len(dmp.Map, 1)
-	assert.EqualValues(types.String{Value: "world"}, dmp.Map[types.String{Value:"hellO"}])
+	assert.EqualValues(types.String{Value: "world",PositionInformation: types.PositionInformation{Start:9,End:13}}, dmp.Map[types.String{Value:"hellO"}])
 	assert.Len(dmp.List, 1)
-	assert.EqualValues(&types.Bool{Value: false}, dmp.List[0])
+	assert.EqualValues(&types.Bool{Value: false, PositionInformation: types.PositionInformation{Start:15,End:19}}, dmp.List[0])
 }
 
 func TestParseString(t *testing.T) {
@@ -43,9 +44,9 @@ func TestParseString(t *testing.T) {
 	dmp := mapList.List[0].(*types.MapList)
 
 	assert.Len(dmp.Map, 1)
-	assert.EqualValues(types.String{Value: "world"}, dmp.Map[types.String{Value:"hellO"}])
+	assert.EqualValues(types.String{Value: "world",PositionInformation: types.PositionInformation{Start:9,End:13}}, dmp.Map[types.String{Value:"hellO"}])
 	assert.Len(dmp.List, 1)
-	assert.EqualValues(&types.Bool{Value: false}, dmp.List[0])
+	assert.EqualValues(&types.Bool{Value: false, PositionInformation: types.PositionInformation{Start:15,End:19}}, dmp.List[0])
 }
 
 func TestMustParse(t *testing.T) {
@@ -53,12 +54,21 @@ func TestMustParse(t *testing.T) {
 	files, err := ioutil.ReadDir("./tests/must-parse")
 	assert.NoError(err, "Must read test directory")
 	for _, file := range files {
-		t.Logf("Running test %s", file.Name())
-		fp := filepath.Join("./tests/must-parse", file.Name())
-		data, err := ioutil.ReadFile(fp)
-		assert.NoError(err, "Must read test file")
-		ml, err := ParseBytes(data)
-		assert.NoError(err, "Must parse without error")
-		t.Logf("Output of test %s:\n%s", file.Name(), types.PrintValue(ml))
+		if filepath.Ext(file.Name()) == ".secl" {
+			t.Logf("Running test %s", file.Name())
+			fp := filepath.Join("./tests/must-parse", file.Name())
+			data, err := ioutil.ReadFile(fp)
+			assert.NoError(err, "Must read test file")
+			fp2 := filepath.Join("./tests/must-parse", strings.TrimSuffix(file.Name(), ".secl") + ".expt")
+			dataExpected, err := ioutil.ReadFile(fp2)
+			assert.NoError(err, "Must read expected output file")
+
+			ml, err := ParseBytes(data)
+			assert.NoError(err, "Must parse without error")
+
+			t.Logf("Output of Test %s: %s", file.Name(), types.PrintDebug(ml))
+
+			assert.Equal(string(dataExpected), types.PrintDebug(ml), "Must match expected debug output")
+		}
 	}
 }

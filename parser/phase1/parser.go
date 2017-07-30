@@ -72,12 +72,14 @@ func (p *Parser) Step() error {
 	switch tok.Type {
 	case lexer.TTBool:
 		b := &types.Bool{}
+		b.PositionInformation = types.PositionInformation{tok.Start, tok.End}
 		if tok.Literal == "true" || tok.Literal == "on" || tok.Literal == "allow" || tok.Literal == "yes" {
 			b.Value = true
 		} else if tok.Literal == "false" || tok.Literal == "off" || tok.Literal == "deny" || tok.Literal == "no" {
 			b.Value = false
 		} else if tok.Literal == "maybe" {
 			b.Value = helper.RndFloat() > 0.501
+			b.Randomized = types.Randomized{Random:true}
 		} else {
 			return errors.Errorf("Wanted a boolean value but got %q, %+v", tok.Literal, tok)
 		}
@@ -93,10 +95,16 @@ func (p *Parser) Step() error {
 	case lexer.TTString:
 		p.FlatAST.Append(types.String{
 			Value: tok.Literal,
+			PositionInformation: types.PositionInformation{
+				Start: tok.Start, End: tok.End,
+			},
 		})
 	case lexer.TTSingleWordString:
 		p.FlatAST.Append(types.String{
 			Value: tok.Literal,
+			PositionInformation: types.PositionInformation{
+				Start: tok.Start, End: tok.End,
+			},
 		})
 	case lexer.TTModExecMap:
 		p.FlatAST.Append(ExecMap{})
@@ -136,6 +144,8 @@ func (p *Parser) Step() error {
 		}
 		p.FlatAST.Append(types.String{
 			Value: helper.RndStr(length),
+			PositionInformation: types.PositionInformation{tok.Start, tok.End},
+			Randomized: types.Randomized{Random:true},
 		})
 	case lexer.TTEOF:
 		return io.EOF

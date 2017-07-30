@@ -1,4 +1,4 @@
-package exec // import "go.rls.moe/secl/exe"
+package exec // import "go.rls.moe/secl/exec"
 
 import (
 	"github.com/pkg/errors"

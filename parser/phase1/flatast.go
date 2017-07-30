@@ -41,7 +41,7 @@ type MapBegin struct{}
 
 // Literal returns "("
 func (MapBegin) Literal() string {
-	return "("
+	return string(TMapBegin)
 }
 
 // Type returns TMapBegin
@@ -56,7 +56,7 @@ type MapEnd struct{}
 
 // Literal returns ")"
 func (MapEnd) Literal() string {
-	return ")"
+	return string(TMapEnd)
 }
 
 // Type returns TMapEnd
@@ -95,7 +95,7 @@ type EmptyMap struct{}
 
 // Literal returns "empty"
 func (EmptyMap) Literal() string {
-	return "empty"
+	return string(TMapEmpty)
 }
 
 // Type returns TMapEmpty
@@ -110,7 +110,7 @@ type ExecMap struct{}
 
 // Literal returns "!exec"
 func (ExecMap) Literal() string {
-	return "!exec"
+	return string(TMapExec)
 }
 
 // Type returns TMapExec
