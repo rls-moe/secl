@@ -126,7 +126,7 @@ func (p *Parser) Step() error {
 			}
 			str := in.(types.String)
 			return &MapKey{
-				Value: str.Value,
+				Value: str,
 			}, nil
 		}); err != nil {
 			return errors.Wrap(err, "Could not replace value")

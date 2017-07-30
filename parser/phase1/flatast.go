@@ -68,12 +68,12 @@ var _ types.Value = MapEnd{} // Assert that MapEnd is a value
 
 // MapKey is a temporary type used to indicate keys, ie "test:"
 type MapKey struct {
-	Value string
+	Value types.String
 }
 
 // Literal returns "[<key>]"
 func (m MapKey) Literal() string {
-	return "[" + m.Value + ":]"
+	return "[" + m.Value.Value + ":]"
 }
 
 // Type returns TMapKey
@@ -84,7 +84,7 @@ func (MapKey) Type() types.Type {
 // Key returns the Key of the MapKey as a types.String
 func (m MapKey) Key() types.String {
 	return types.String{
-		Value: m.Value,
+		Value: m.Value.Value,
 	}
 }
 
