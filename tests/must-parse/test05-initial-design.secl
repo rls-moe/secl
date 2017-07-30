@@ -1,0 +1,6 @@
+test: (
+    key1: "Test Value"
+    key2: "Test Value2"
+    "List Item 1"
+    "List Item 2"
+)

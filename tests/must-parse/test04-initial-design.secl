@@ -1,0 +1,7 @@
+nested-values: (
+    section1: (
+        bool-value: off
+        text: "This is a short test text"
+    )
+    section4: empty
+)

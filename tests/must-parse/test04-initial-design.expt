@@ -1,0 +1,1 @@
+( //MAP "nested-values"/STRING(0:0): ( //MAP "section1"/STRING(0:0): ( //MAP "bool-value"/STRING(0:0): false/BOOLEAN(53:55) "text"/STRING(0:0): "This is a short test text"/STRING(71:97) //LIST ) "section4"/STRING(0:0): ( //MAP //LIST ) //LIST ) //LIST )
