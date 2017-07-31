@@ -1,0 +1,26 @@
+{
+    "name": "secl-highlight",
+    "displayName": "secl-highlight",
+    "description": "SECL Syntax Highlighting",
+    "version": "0.0.1",
+    "publisher": "tscs37",
+    "engines": {
+        "vscode": "^1.14.0"
+    },
+    "categories": [
+        "Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "secl",
+            "aliases": ["SECL", "secl"],
+            "extensions": [".secl"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "secl",
+            "scopeName": "source.secl",
+            "path": "./syntaxes/secl.tmLanguage.json"
+        }]
+    }
+}

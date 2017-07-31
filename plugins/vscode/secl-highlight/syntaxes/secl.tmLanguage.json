@@ -1,0 +1,32 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "SECL",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#strings"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.secl",
+				"match": "\\b(randstr|randstr32|randstr64|randstr128|randstr256|maybe)\\b"
+			}]
+		},
+		"strings": {
+			"name": "string.quoted.double.secl",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.secl",
+					"match": "\\\\."
+				}
+			]
+		}
+	},
+	"scopeName": "source.secl"
+}
