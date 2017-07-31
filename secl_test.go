@@ -56,7 +56,7 @@ func TestMustParse(t *testing.T) {
 	assert.NoError(err, "Must read test directory")
 	for _, file := range files {
 		if filepath.Ext(file.Name()) == ".secl" {
-			t.Logf("Running test %s", file.Name())
+			t.Logf("Running test %-45s: ----", file.Name())
 			fp := filepath.Join("./tests/must-parse", file.Name())
 			data, err := ioutil.ReadFile(fp)
 			assert.NoError(err, "Must read test file")
@@ -67,7 +67,7 @@ func TestMustParse(t *testing.T) {
 			ml, err := ParseBytes(data)
 			assert.NoError(err, "Must parse without error")
 
-			t.Logf("Output of Test %s: %s", file.Name(), types.PrintDebug(ml))
+			t.Logf("Output of Test %-45s: %s", file.Name(), types.PrintDebug(ml))
 
 			assert.Equal(string(dataExpected), types.PrintDebug(ml), "Must match expected debug output")
 
@@ -77,11 +77,11 @@ func TestMustParse(t *testing.T) {
 			assert.Equal(types.PrintValue(ml), types.PrintValue(ml2))
 
 			if strings.HasSuffix(file.Name(), ".exec.secl") {
-				t.Log("Expanding Testfile")
 				ml3, err := exec.Eval(ml)
 				assert.NoError(err)
 
-				t.Logf("Output of Expanded Test %s: %s", file.Name(), types.PrintDebug(ml3))
+				t.Logf("Output of Expanded Test %-36s: %s", file.Name(), types.PrintDebug(ml3))
+				t.Logf("Parsable Output of Expanded Test  %-26s: %s", file.Name(), types.PrintReproducableValue(ml3.(*types.MapList)))
 
 				fp3 := filepath.Join("./tests/must-parse", strings.TrimSuffix(file.Name(), ".exec.secl") + ".expt")
 				dataExpected, err := ioutil.ReadFile(fp3)
