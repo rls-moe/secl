@@ -1,4 +1,5 @@
 package lexer // import "go.rls.moe/secl/lexer"
+import "github.com/pkg/errors"
 
 // Token is a simple struct to keep track of the position, type and literal of a token
 type Token struct {
@@ -54,4 +55,13 @@ var keywords = map[string]TokenType{
 	"loadb":      TTFunction,
 	"decb64":     TTFunction,
 	"nop":        TTFunction,
+}
+
+func RegisterFunctionKeyword(keyword string) error {
+	_, ok := keywords[keyword]
+	if ok {
+		return errors.New("Keyword already used")
+	}
+	keywords[keyword] = TTFunction
+	return nil
 }

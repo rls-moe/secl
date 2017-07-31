@@ -135,3 +135,19 @@ The true category contains `true`, `yes`, `on` and `allow`
 The false category contains `false`, `no`, `off` and `deny`
 
 The maybe category contains `maybe`. This keywords randomly evaluates to either true or false with a 50.1% chance of being true.
+
+## Functions
+
+Functions provide programmatic functionality to SECL, some functions are built-in but you can add your own, custom functions via exec.RegisterFunction.
+
+Currently implemented functions:
+
+* `nop` - does not parse any parameter, returns Nil
+* `env` - Accepts 1 string parameter and 1 named parameter, it reads the environment variable specified in the parameter and if empty, uses the named parameter `default:` instead, see `tests/test06-env.exec.secl` for an example
+
+Planned functions:
+
+* `loadv` - Load single value (anything but a maplist) from a file
+* `loadd` - Load all files with a specific extension from a folder
+* `loadb` - Load binary data from a file
+* `decb64` - Decode base64 data

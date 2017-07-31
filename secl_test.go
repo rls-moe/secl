@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"path/filepath"
 	"strings"
+	"go.rls.moe/secl/exec"
 )
 
 func TestParseBytes(t *testing.T) {
@@ -74,6 +75,21 @@ func TestMustParse(t *testing.T) {
 			assert.NoError(err)
 
 			assert.Equal(types.PrintValue(ml), types.PrintValue(ml2))
+
+			if strings.HasSuffix(file.Name(), ".exec.secl") {
+				t.Log("Expanding Testfile")
+				ml3, err := exec.Eval(ml)
+				assert.NoError(err)
+
+				t.Logf("Output of Expanded Test %s: %s", file.Name(), types.PrintDebug(ml3))
+
+				fp3 := filepath.Join("./tests/must-parse", strings.TrimSuffix(file.Name(), ".exec.secl") + ".expt")
+				dataExpected, err := ioutil.ReadFile(fp3)
+
+				assert.NoError(err, "Must read expected expanded output file")
+
+				assert.Equal(string(dataExpected), types.PrintDebug(ml3))
+			}
 		}
 	}
 }

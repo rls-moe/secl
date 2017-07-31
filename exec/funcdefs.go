@@ -3,6 +3,7 @@ package exec // import "go.rls.moe/secl/exec"
 import (
 	"github.com/pkg/errors"
 	"go.rls.moe/secl/types"
+	"go.rls.moe/secl/lexer"
 )
 
 // SECLFunc is a generic function to be executed in a SECL file
@@ -44,4 +45,12 @@ func EvalMapList(list *types.MapList) (types.Value, error) {
 	}
 
 	return fncCall(list)
+}
+
+func RegisterFunction(keyword string, fnc SECLFunc) error {
+	if err := lexer.RegisterFunctionKeyword(keyword); err != nil {
+		return err
+	}
+	functions[keyword] = fnc
+	return nil
 }
