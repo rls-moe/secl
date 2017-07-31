@@ -97,6 +97,7 @@ func (p *Parser) Step() error {
 			"\\n", "\n",
 			"\\t", "\t",
 			"\\\"", "\"",
+			"\\\\", "\\",
 		)
 		tok.Literal = replacer.Replace(tok.Literal)
 		p.FlatAST.Append(types.String{
