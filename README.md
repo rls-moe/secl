@@ -34,7 +34,7 @@ key: (
 
     new-features: (
         "loading environment variables": !(env "SOME_ENV_VAR")
-        "with defautls": !(env "SOME_ENV_VAR" default: "Default Value")
+        "with defaults": !(env "SOME_ENV_VAR" default: "Default Value")
     )
 )
 ```
