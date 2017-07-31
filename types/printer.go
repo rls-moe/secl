@@ -2,6 +2,7 @@ package types // import "go.rls.moe/secl/types"
 import (
 	"sort"
 	"fmt"
+	"strings"
 )
 
 // PrintValue will print out a debug string of a given Value. This string is not necessarily a valid SECL
@@ -36,6 +37,14 @@ func PrintValue(p Value) string {
 	default:
 		return fmt.Sprintf("%s", p.Literal())
 	}
+}
+
+// PrintReproducableValue is intended for serializing maplists into a string that reproduces the exact same maplist when read
+func PrintReproducableValue(p *MapList) string {
+	str := PrintValue(p)
+	str = strings.TrimSuffix(str, " )")
+	str = strings.TrimPrefix(str, "( ")
+	return str
 }
 
 // PrintDebug will print out a debug string of a given Value. This contains more information than PrintValue

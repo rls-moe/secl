@@ -93,6 +93,12 @@ func (p *Parser) Step() error {
 	case lexer.TTMapListEnd:
 		p.FlatAST.Append(MapEnd{})
 	case lexer.TTString:
+		replacer := strings.NewReplacer(
+			"\\n", "\n",
+			"\\t", "\t",
+			"\\\"", "\"",
+		)
+		tok.Literal = replacer.Replace(tok.Literal)
 		p.FlatAST.Append(types.String{
 			Value: tok.Literal,
 			PositionInformation: types.PositionInformation{

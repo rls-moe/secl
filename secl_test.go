@@ -69,6 +69,11 @@ func TestMustParse(t *testing.T) {
 			t.Logf("Output of Test %s: %s", file.Name(), types.PrintDebug(ml))
 
 			assert.Equal(string(dataExpected), types.PrintDebug(ml), "Must match expected debug output")
+
+			ml2, err := ParseString(types.PrintReproducableValue(ml))
+			assert.NoError(err)
+
+			assert.Equal(types.PrintValue(ml), types.PrintValue(ml2))
 		}
 	}
 }
