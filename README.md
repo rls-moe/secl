@@ -31,6 +31,11 @@ key: (
         
         "mix lists and maps, they are the same in SECL"
     )
+
+    new-features: (
+        "loading environment variables": !(env "SOME_ENV_VAR")
+        "with defautls": !(env "SOME_ENV_VAR" default: "Default Value")
+    )
 )
 ```
 
