@@ -24,6 +24,7 @@ var functions = map[string]SECLFunc{
 	"nop": func(list *types.MapList) (types.Value, error) {
 		return types.Nil{}, nil
 	},
+	"decb64": decb64,
 }
 
 // EvalMapList executes a MapList which has been marked executable with the correct function

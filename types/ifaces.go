@@ -7,3 +7,17 @@ type Value interface {
 	// Type returns the data type of the value, use this to determine to which type to cast
 	Type() Type
 }
+
+
+type IRandomized interface {
+	IsRandom() bool
+}
+
+
+type IPositionInformation interface {
+	Position() (int, int)
+}
+
+type DebugValue interface {
+	DebugPrint() string
+}

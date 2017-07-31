@@ -85,6 +85,8 @@ func PrintDebug(p Value) string {
 		} else {
 			if _, ok := p.(String); ok {
 				str += fmt.Sprintf("%q", p.Literal())
+			} else if v, ok := p.(DebugValue); ok {
+				str += v.DebugPrint()
 			} else {
 				str += p.Literal()
 			}

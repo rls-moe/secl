@@ -1,4 +1,4 @@
-package exec
+package exec // import "go.rls.moe/secl/exec"
 
 import (
 	"go.rls.moe/secl/types"

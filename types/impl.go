@@ -1,4 +1,8 @@
 package types // import "go.rls.moe/secl/types"
+import (
+	"fmt"
+	"encoding/base64"
+)
 
 // Literal returns the raw string value of the entity
 func (s String) Literal() string {
@@ -71,4 +75,16 @@ func (Nil) Literal() string {
 // Type returns TNil
 func (Nil) Type() Type {
 	return TNil
+}
+
+func (b *Binary) Literal() string {
+	return fmt.Sprintf("!(decb64 \"%s\")", base64.RawURLEncoding.EncodeToString(b.Raw))
+}
+
+func (b *Binary) Type() Type {
+	return TBinary
+}
+
+func (b* Binary) DebugPrint() string {
+	return fmt.Sprintf("0x%X", b.Raw)
 }

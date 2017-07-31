@@ -14,6 +14,7 @@ const (
 	TFloat         = "NUMBER_FLOAT"
 	TFunction      = "FUNCTION"
 	TNil           = "NIL"
+	TBinary        = "BINARY"
 )
 
 type Randomized struct {
@@ -24,20 +25,12 @@ func (r Randomized) IsRandom() bool {
 	return r.Random
 }
 
-type IRandomized interface {
-	IsRandom() bool
-}
-
 type PositionInformation struct {
 	Start, End int
 }
 
 func (p PositionInformation) Position() (int, int) {
 	return p.Start, p.End
-}
-
-type IPositionInformation interface {
-	Position() (int, int)
 }
 
 // String is a text value
@@ -92,3 +85,9 @@ var _ Value = Function{} // Assert that Function is a Value
 type Nil struct{}
 
 var _ Value = Nil{} // Assert that Nil is a Value
+
+type Binary struct {
+	Raw []byte
+}
+
+var _ Value = &Binary{}
