@@ -79,19 +79,29 @@ func (p *Parser) Step() error {
 			b.Value = false
 		} else if tok.Literal == "maybe" {
 			b.Value = helper.RndFloat() > 0.501
-			b.Randomized = types.Randomized{Random:true}
+			b.Randomized = types.Randomized{Random: true}
 		} else {
 			return errors.Errorf("Wanted a boolean value but got %q, %+v", tok.Literal, tok)
 		}
-		p.FlatAST.Append(b)
+		if err := p.FlatAST.Append(b); err != nil {
+			return err
+		}
 	case lexer.TTEmpty:
-		p.FlatAST.Append(EmptyMap{})
+		if err := p.FlatAST.Append(EmptyMap{}); err != nil {
+			return err
+		}
 	case lexer.TTNil:
-		p.FlatAST.Append(types.Nil{})
+		if err := p.FlatAST.Append(types.Nil{}); err != nil {
+			return err
+		}
 	case lexer.TTMapListBegin:
-		p.FlatAST.Append(MapBegin{})
+		if err := p.FlatAST.Append(MapBegin{}); err != nil {
+			return err
+		}
 	case lexer.TTMapListEnd:
-		p.FlatAST.Append(MapEnd{})
+		if err := p.FlatAST.Append(MapEnd{}); err != nil {
+			return err
+		}
 	case lexer.TTString:
 		replacer := strings.NewReplacer(
 			"\\n", "\n",
@@ -100,32 +110,40 @@ func (p *Parser) Step() error {
 			"\\\\", "\\",
 		)
 		tok.Literal = replacer.Replace(tok.Literal)
-		p.FlatAST.Append(types.String{
+		if err := p.FlatAST.Append(types.String{
 			Value: tok.Literal,
 			PositionInformation: types.PositionInformation{
 				Start: tok.Start, End: tok.End,
 			},
-		})
+		}); err != nil {
+			return err
+		}
 	case lexer.TTSingleWordString:
-		p.FlatAST.Append(types.String{
+		if err := p.FlatAST.Append(types.String{
 			Value: tok.Literal,
 			PositionInformation: types.PositionInformation{
 				Start: tok.Start, End: tok.End,
 			},
-		})
+		}); err != nil {
+			return nil
+		}
 	case lexer.TTModExecMap:
 		p.FlatAST.Append(ExecMap{})
 	case lexer.TTFunction:
-		p.FlatAST.Append(types.Function{
+		if err := p.FlatAST.Append(types.Function{
 			Identifier: tok.Literal,
-		})
+		}); err != nil {
+			return err
+		}
 	case lexer.TTNumber:
 		val, err := ConvertNumber(tok.Literal)
 		if err != nil {
 			return errors.Wrapf(err, "Could not convert token %q at position %d-%d",
 				tok.Literal, tok.Start, tok.End)
 		}
-		p.FlatAST.Append(val)
+		if err := p.FlatAST.Append(val); err != nil {
+			return err
+		}
 	case lexer.TTModMapKey:
 		if err := p.FlatAST.ReplaceLast(func(in types.Value) (types.Value, error) {
 			if in.Type() != types.TString {
@@ -149,13 +167,22 @@ func (p *Parser) Step() error {
 		} else if strings.HasSuffix(tok.Literal, "256") {
 			length = 64
 		}
-		p.FlatAST.Append(types.String{
-			Value: helper.RndStr(length),
+		if err := p.FlatAST.Append(types.String{
+			Value:               helper.RndStr(length),
 			PositionInformation: types.PositionInformation{tok.Start, tok.End},
-			Randomized: types.Randomized{Random:true},
-		})
+			Randomized:          types.Randomized{Random: true},
+		}); err != nil {
+			return err
+		}
 	case lexer.TTEOF:
 		return io.EOF
+	case lexer.TTModTrim:
+		p.FlatAST.ModNext = func(value types.Value) (types.Value, error) {
+			if value.Type() != types.TString {
+				return nil, errors.Errorf("TrimString modification was not followed by a string but by %s", value.Type())
+			}
+			return trimString(value.(types.String)), nil
+		}
 	default:
 		return errors.Errorf("Unknown Token %s: %+v", tok.Type, tok)
 	}
@@ -171,4 +198,9 @@ func (p *Parser) Step() error {
 func (p *Parser) Output() *AST {
 	q := (*AST)(p.FlatAST)
 	return q
+}
+
+func trimString(s types.String) types.String {
+	s.Value = strings.TrimSpace(s.Value)
+	return s
 }

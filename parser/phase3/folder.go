@@ -4,6 +4,7 @@ import (
 	"github.com/pkg/errors"
 	"go.rls.moe/secl/parser/phase1"
 	"go.rls.moe/secl/types"
+	"go.rls.moe/secl/lexer"
 )
 
 // ErrKeyAtEnd indicates that a key was the last element of a list, which means it has no value to associate with.
@@ -32,6 +33,8 @@ func Fold(maplist *types.MapList) error {
 	for k := 0; k < len(maplist.List); k++ {
 		cur := maplist.List[k]
 		switch cur.Type() {
+		case lexer.TTModTrim:
+			panic("Wat")
 		case phase1.TMapExec:
 			if len(maplist.List) <= k+1 {
 				return ErrKeyAtEnd

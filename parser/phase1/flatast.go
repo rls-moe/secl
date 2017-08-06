@@ -16,11 +16,21 @@ const (
 // rootNode is a List-based AST with no depth
 type rootNode struct {
 	FlatNodes []types.Value
+	ModNext func(value types.Value) (types.Value, error)
 }
 
 // Append puts the given value at the end of the current AST
-func (r *rootNode) Append(value types.Value) {
+func (r *rootNode) Append(value types.Value) error {
+	var err error
+	if r.ModNext != nil {
+		value, err = r.ModNext(value)
+		r.ModNext = nil
+		if err != nil {
+			return err
+		}
+	}
 	r.FlatNodes = append(r.FlatNodes, value)
+	return nil
 }
 
 // ReplaceLast accepts a replacer function and executes it using the last element as parameter.
