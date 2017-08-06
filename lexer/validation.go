@@ -39,7 +39,17 @@ func isValidInNumber(cr rune) bool {
 		cr == 'e' ||
 		cr == '.' ||
 		cr == '*' ||
-		cr == '^'))
+		cr == '^' ||
+		unicode.In(cr, unicode.Hex_Digit)))
+}
+
+func isValidAsSecondDigit(cr rune) bool {
+	return isNotNull(cr) && (unicode.IsNumber(cr) || isValidInNumber(cr) || (cr == 'x' ||
+		cr == 'o' ||
+		cr == 'b' ||
+		cr == 'X' ||
+		cr == 'O' ||
+		cr == 'B'))
 }
 
 func isValidStringBorder(cr rune) bool {

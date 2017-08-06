@@ -12,9 +12,9 @@ var (
 	regexIntegerHex     = regexp.MustCompile(`^[+-]?0x[0-9A-Fa-f]+$`)
 	regexIntegerOct     = regexp.MustCompile(`^[+-]?0o[0-7]+$`)
 	regexIntegerBin     = regexp.MustCompile(`^[+-]?0b[01]+$`)
-	regexFloatDecimal   = regexp.MustCompile(`^[+-]?\d+.\d+$`)
-	regexFloatSci       = regexp.MustCompile(`^([+-]?)(\d+.\d+)\*10\^([+-]?)(\d{1,3})$`)
-	regexFloatExp       = regexp.MustCompile(`^([+-]?)(\d+.\d+)e([+-]?)(\d{1,3})$`)
+	regexFloatDecimal   = regexp.MustCompile(`^[+-]?\d+\.\d+$`)
+	regexFloatSci       = regexp.MustCompile(`^([+-]?)(\d+\.\d+)\*10\^([+-]?)(\d{1,3})$`)
+	regexFloatExp       = regexp.MustCompile(`^([+-]?)(\d+\.\d+)e([+-]?)(\d{1,3})$`)
 )
 
 // ConvertNumber will check the incoming literal against the internal regex list and
@@ -24,28 +24,43 @@ func ConvertNumber(lit string) (types.Value, error) {
 		bi := big.NewInt(0)
 		bir, ok := bi.SetString(lit, 10)
 		if !ok {
-			return nil, errors.New("Could not parse integer")
+			return nil, errors.Errorf("Could not parse integer (dec): %s", lit)
 		}
 		return &types.Integer{Value: bir}, nil
 	} else if regexFloatDecimal.MatchString(lit) {
 		bf := big.NewFloat(0)
 		bfr, ok := bf.SetString(lit)
 		if !ok {
-			return nil, errors.New("Could not parse float")
+			return nil, errors.Errorf("Could not parse float (dec): %s", lit)
 		}
 		return &types.Float{Value: bfr}, nil
-	} else if regexIntegerHex.MatchString(lit) {
-		return nil, errors.New("Hexadecimal Numbers not implemented")
 	} else if regexIntegerOct.MatchString(lit) {
-		return nil, errors.New("Octal Numbers not implemented")
+		bi := big.NewInt(0)
+		bir, ok := bi.SetString(lit[2:], 8)
+		if !ok {
+			return nil, errors.Errorf("Could not parse integer (oct): %s", lit)
+		}
+		return &types.Integer{Value: bir}, nil
+	} else if regexIntegerHex.MatchString(lit) {
+		bi := big.NewInt(0)
+		bir, ok := bi.SetString(lit[2:], 16)
+		if !ok {
+			return nil, errors.Errorf("Could not parse integer (hex): %s", lit)
+		}
+		return &types.Integer{Value: bir}, nil
 	} else if regexIntegerBin.MatchString(lit) {
-		return nil, errors.New("Binary Numbers not implemented")
-	} else if regexFloatSci.MatchString(lit) {
+		bi := big.NewInt(0)
+		bir, ok := bi.SetString(lit[2:], 2)
+		if !ok {
+			return nil, errors.Errorf("Could not parse integer (bin): %s", lit)
+		}
+		return &types.Integer{Value: bir}, nil
+	}  else if regexFloatSci.MatchString(lit) {
 		matches := regexFloatSci.FindStringSubmatch(lit)
 		fpv := big.NewFloat(0.0)
 		_, ok := fpv.SetString(matches[2])
 		if !ok {
-			return nil, errors.New("Could not parse Numeric Value")
+			return nil, errors.Errorf("Could not parse numeric value: %s", lit)
 		}
 		if matches[1] == "-" {
 			fpv.Mul(fpv, big.NewFloat(-1.0))
@@ -53,7 +68,7 @@ func ConvertNumber(lit string) (types.Value, error) {
 		fpe := big.NewInt(0.0)
 		_, ok = fpe.SetString(matches[4], 10)
 		if !ok {
-			return nil, errors.New("Could not parse Exponent Value")
+			return nil, errors.Errorf("Could not parse exponent value: %s", lit)
 		}
 		if matches[3] == "-" {
 			fpe.Mul(fpe, big.NewInt(-1))
@@ -63,13 +78,13 @@ func ConvertNumber(lit string) (types.Value, error) {
 			fpev.Mul(fpev, big.NewFloat(10.0))
 			fpe.Sub(fpe, big.NewInt(1))
 		}
-		return &types.Float{Value:fpv.Mul(fpv, fpev)}, nil
+		return &types.Float{Value: fpv.Mul(fpv, fpev)}, nil
 	} else if regexFloatExp.MatchString(lit) {
 		matches := regexFloatExp.FindStringSubmatch(lit)
 		fpv := big.NewFloat(0.0)
 		_, ok := fpv.SetString(matches[2])
 		if !ok {
-			return nil, errors.New("Could not parse Numeric Value")
+			return nil, errors.Errorf("Could not parse numeric value: %s", lit)
 		}
 		if matches[1] == "-" {
 			fpv.Mul(fpv, big.NewFloat(-1.0))
@@ -77,7 +92,7 @@ func ConvertNumber(lit string) (types.Value, error) {
 		fpe := big.NewInt(0.0)
 		_, ok = fpe.SetString(matches[4], 10)
 		if !ok {
-			return nil, errors.New("Could not parse Exponent Value")
+			return nil, errors.Errorf("Could not parse exponent value: %s", lit)
 		}
 		if matches[3] == "-" {
 			fpe.Mul(fpe, big.NewInt(-1))
@@ -87,7 +102,7 @@ func ConvertNumber(lit string) (types.Value, error) {
 			fpev.Mul(fpev, big.NewFloat(10.0))
 			fpe.Sub(fpe, big.NewInt(1))
 		}
-		return &types.Float{Value:fpv.Mul(fpv, fpev)}, nil
+		return &types.Float{Value: fpv.Mul(fpv, fpev)}, nil
 	}
-	return nil, errors.New("Number did not match any known format")
+	return nil, errors.Errorf("Number did not match any known format: %s", lit)
 }

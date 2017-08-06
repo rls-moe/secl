@@ -43,12 +43,8 @@ key: (
 
 SECL is considered in Version 0.9
 
-Most features are now part of the authorative implementation in this repository.
-
-Missing features:
-  
-  * Hex, Octal and Binary Notation (`0x1F`, `0o777`, `0b110101`)
-  * Functions (Some functions are not yet implemented)
+Most features are now part of the reference implementation in this repository. The two functions `merge` and `loadd`
+are not implemented yet but for single-file configurations they are not necessary.
 
 ## Introduction
 
@@ -83,7 +79,7 @@ Hello
 World"
 ```
 
-The special values `randstr` and `randstr32` to `randstr256` allow the usage of random strings in the config. This can be useful for security purposes.
+The special values `randstr` and `randstr32` to `randstr256` allow the usage of random strings in the config. This can be useful for security purposes like HMAC keys.
 
 ### Comments
 
@@ -149,10 +145,12 @@ Currently implemented functions:
 
 * `nop` - does not parse any parameter, returns Nil
 * `env` - Accepts 1 string parameter and 1 named parameter, it reads the environment variable specified in the parameter and if empty, uses the named parameter `default:` instead, see `tests/test06-env.exec.secl` for an example
+* `loadb` - Load binary data from a file
+* `loadf` - Load a single file as SECL and return the result maplist
+* `loadv` - Load single value (anything but a maplist) from a file
+* `decb64` - Decode base64 data
 
 Planned functions:
 
-* `loadv` - Load single value (anything but a maplist) from a file
 * `loadd` - Load all files with a specific extension from a folder
-* `loadb` - Load binary data from a file
-* `decb64` - Decode base64 data
+* `merge` - Merge several maplists into one maplist

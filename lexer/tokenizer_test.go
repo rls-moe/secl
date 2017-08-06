@@ -13,7 +13,7 @@ func TestTokenizer_NextToken(t *testing.T) {
 /+notacomment
 /* this is a ml
 comment that
-should stop parsing here */ ()`
+should stop parsing here */ () 0xF 0x0 0b0 0b1 0o7 0o1`
 
 	tests := []struct {
 		expectedType    TokenType
@@ -59,7 +59,13 @@ should stop parsing here */ ()`
 		{TTComment, "/* this is a ml\ncomment that\nshould stop parsing here */", 211, 266},
 		{TTMapListBegin, "(", 268, 268},
 		{TTMapListEnd, ")", 269, 269},
-		{TTEOF, "", 270, 270},
+		{TTNumber, "0xF", 271, 273},
+		{TTNumber, "0x0", 275, 277},
+		{TTNumber, "0b0", 279, 281},
+		{TTNumber, "0b1", 283, 285},
+		{TTNumber, "0o7", 287, 289},
+		{TTNumber, "0o1", 291, 293},
+		{TTEOF, "", 294, 294},
 	}
 
 	l := NewTokenizer(input)

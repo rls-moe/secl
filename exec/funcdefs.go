@@ -25,6 +25,9 @@ var functions = map[string]SECLFunc{
 		return types.Nil{}, nil
 	},
 	"decb64": decb64,
+	"loadv": loadv,
+	"loadb": loadb,
+	"loadf": loadf,
 }
 
 // EvalMapList executes a MapList which has been marked executable with the correct function
