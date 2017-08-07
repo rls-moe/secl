@@ -23,50 +23,50 @@ func TestQuery(t *testing.T) {
 	test := UnmTest{}
 
 	err := NewUnmarshalWithQuery(&test.TestString,
-		NewMapKeySelect("a"),
-		NewMapKeySelect("b"),
-		NewListSelect(1),
+		KeySelect("a"),
+		KeySelect("b"),
+		ListSelect(1),
 	).Run(ml)
 
 	assert.NoError(err)
 	assert.Equal("d", test.TestString)
 
 	err = NewUnmarshalWithQuery(&test.TestBool,
-		NewMapKeySelect("a"),
-		NewMapKeySelect("b"),
-		NewListSelect(2),
+		KeySelect("a"),
+		KeySelect("b"),
+		ListSelect(2),
 	).Run(ml)
 
 	assert.NoError(err)
 	assert.True(test.TestBool)
 
 	err = NewUnmarshalWithQuery(&test.TestInteger,
-		NewMapKeySelect("a"),
-		NewListSelect(0),
+		KeySelect("a"),
+		ListSelect(0),
 	).Run(ml)
 
 	assert.NoError(err)
 	assert.Equal(8, test.TestInteger)
 
 	err = NewUnmarshalWithQuery(&test.TestUInteger,
-		NewMapKeySelect("a"),
-		NewListSelect(0),
+		KeySelect("a"),
+		ListSelect(0),
 	).Run(ml)
 
 	assert.NoError(err)
 	assert.Equal(uint(8), test.TestUInteger)
 
 	err = NewUnmarshalWithQuery(&test.TestFloat32,
-		NewMapKeySelect("a"),
-		NewListSelect(1),
+		KeySelect("a"),
+		ListSelect(1),
 	).Run(ml)
 
 	assert.NoError(err)
 	assert.Equal(float32(9.91), test.TestFloat32)
 
 	err = NewUnmarshalWithQuery(&test.TestFloat64,
-		NewMapKeySelect("a"),
-		NewListSelect(1),
+		KeySelect("a"),
+		ListSelect(1),
 	).Run(ml)
 
 	assert.NoError(err)

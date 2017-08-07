@@ -1,4 +1,4 @@
-package query
+package query // import "go.rls.moe/secl/query"
 
 import (
 	"github.com/pkg/errors"
@@ -34,15 +34,15 @@ func (q Query) Select(val types.Value) (types.Value, error) {
 	return curVal, nil
 }
 
-type MapKeySelect struct {
+type mapKeySelect struct {
 	Key string
 }
 
-func NewMapKeySelect(key string) PathSegment {
-	return &MapKeySelect{Key: key}
+func KeySelect(key string) PathSegment {
+	return &mapKeySelect{Key: key}
 }
 
-func (m *MapKeySelect) Select(value types.Value) (types.Value, error) {
+func (m *mapKeySelect) Select(value types.Value) (types.Value, error) {
 	if value.Type() == types.TMapList {
 		ml := value.(*types.MapList)
 		v, ok := ml.Map[types.String{Value: m.Key}]
@@ -54,19 +54,61 @@ func (m *MapKeySelect) Select(value types.Value) (types.Value, error) {
 	return nil, errors.Errorf("Expected map but got %s for key %s", value.Type(), m.Key)
 }
 
-type ListSelect struct {
+type mapKeySelectDefault struct {
+	Key string
+	Default types.Value
+}
+
+func KeySelectDefault(key string, def types.Value) PathSegment {
+	return &mapKeySelectDefault{Key: key, Default: def}
+}
+
+func (m *mapKeySelectDefault) Select(value types.Value) (types.Value, error) {
+	if value.Type() == types.TMapList {
+		ml := value.(*types.MapList)
+		v, ok := ml.Map[types.String{Value: m.Key}]
+		if !ok {
+			return nil, errors.Errorf("Key not present in map: %s", m.Key)
+		}
+		return v, nil
+	}
+	return nil, errors.Errorf("Expected map but got %s for key %s", value.Type(), m.Key)
+}
+
+
+type listSelect struct {
 	Index int
 }
 
-func NewListSelect(index int) PathSegment {
-	return &ListSelect{Index: index}
+func ListSelect(index int) PathSegment {
+	return &listSelect{Index: index}
 }
 
-func (l *ListSelect) Select(value types.Value) (types.Value, error) {
+func (l *listSelect) Select(value types.Value) (types.Value, error) {
 	if value.Type() == types.TMapList {
 		ml := value.(*types.MapList)
 		if l.Index >= len(ml.List) {
 			return nil, errors.Errorf("Index exceeds size of map: %d", l.Index)
+		}
+		return ml.List[l.Index], nil
+	}
+	return nil, errors.Errorf("Expected map but got %s for key %s", value.Type(), l.Index)
+}
+
+type listSelectDefaultStruct struct {
+	Index int
+	Default types.Value
+}
+
+func ListSelectDefault(index int, def types.Value) PathSegment {
+	return &listSelectDefaultStruct{Index: index, Default: def}
+}
+
+func (l *listSelectDefaultStruct) Select(value types.Value) (types.Value, error) {
+	if value.Type() == types.TMapList {
+		ml := value.(*types.MapList)
+		if l.Index >= len(ml.List) {
+			return l.Default, nil
 		}
 		return ml.List[l.Index], nil
 	}
@@ -155,7 +197,19 @@ func (u Unmarshal) Select(value types.Value) (types.Value, error) {
 		return value, nil
 	}
 
+	if v, ok := u.Target.(SECLUnmarshal); ok {
+		return nil, v.UnmarshalSECL(value)
+	}
+
+	if v, ok := u.Target.(PathSegment); ok {
+		return v.Select(value)
+	}
+
 	return nil, errors.Errorf("Could not unmarshal because of a type mismatch: %s to %s", rvp.Kind(), value.Type())
+}
+
+type SECLUnmarshal interface {
+	UnmarshalSECL(types.Value) error
 }
 
 type UnmarshalQuery struct {

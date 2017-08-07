@@ -46,6 +46,8 @@ SECL is considered in Version 0.9
 Most features are now part of the reference implementation in this repository. The two functions `merge` and `loadd`
 are not implemented yet but for single-file configurations they are not necessary.
 
+A non-formal specification can be found at [hackmd](https://hackmd.io/s/rylGmiXr-) or in this repository under SPECS.md (hackmd might be more up-to-date than SPECS.md)
+
 ## Introduction
 
 ### Strings

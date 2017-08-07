@@ -53,6 +53,7 @@ var keywords = map[string]TokenType{
 	"loadd":      TTFunction,
 	"loadv":      TTFunction,
 	"loadb":      TTFunction,
+	"loadf":      TTFunction,
 	"decb64":     TTFunction,
 	"nop":        TTFunction,
 }

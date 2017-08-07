@@ -40,7 +40,7 @@ func EvalMapList(list *types.MapList) (types.Value, error) {
 		return nil, ErrListLengthZero
 	}
 	if list.List[0].Type() != types.TFunction {
-		return nil, ErrNotAFunction
+		return nil, errors.Errorf("First element was not a function: %s", types.PrintValue(list.List[0]))
 	}
 	fnc := list.List[0].(types.Function)
 	fncCall, ok := functions[fnc.Identifier]
