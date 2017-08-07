@@ -1,4 +1,4 @@
-package secl
+package secl // import "go.rls.moe/secl"
 
 import (
 	"go.rls.moe/secl/types"

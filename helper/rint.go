@@ -1,4 +1,4 @@
-package helper
+package helper // import "go.rls.moe/secl/helper"
 
 import (
 	"crypto/rand"
