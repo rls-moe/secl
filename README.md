@@ -35,6 +35,12 @@ key: (
     new-features: (
         "loading environment variables": !(env "SOME_ENV_VAR")
         "with defaults": !(env "SOME_ENV_VAR" default: "Default Value")
+        "merge": !(merge
+            (you can now merge several maps)
+            (the list part is appended to the previous map)
+            (keys: are added)
+            (a merge will never change a datatype, it will only overwrite existing keys if their types match)
+        )
     )
 )
 ```
@@ -150,8 +156,8 @@ Currently implemented functions:
 * `loadf` - Load a single file as SECL and return the result maplist
 * `loadv` - Load single value (anything but a maplist) from a file
 * `decb64` - Decode base64 data
+* `merge` - Merge several maplists into one maplist, it does not accept any parameters except maplists. Maplists are merged in order, it is not allowed to change a datatype of an entry.
 
 Planned functions:
 
 * `loadd` - Load all files with a specific extension from a folder
-* `merge` - Merge several maplists into one maplist
