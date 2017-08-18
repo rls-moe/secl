@@ -161,3 +161,12 @@ Currently implemented functions:
 Planned functions:
 
 * `loadd` - Load all files with a specific extension from a folder
+
+### Merge Semantics
+
+Merge will not change the data type of a map entry it is overwriting.
+
+That means `!(merge (hello: world) (hello: 8))` is not valid and neither is `!(merge (hello: (world: 1)) (hello: world))`
+
+Either one would mean that a query path would become invalid. This makes sure that an application can encode
+query paths without having to worry about wether a imported config file will make them invalid.
