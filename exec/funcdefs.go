@@ -28,6 +28,7 @@ var functions = map[string]SECLFunc{
 	"loadv": loadv,
 	"loadb": loadb,
 	"loadf": loadf,
+	"merge": merge,
 }
 
 // EvalMapList executes a MapList which has been marked executable with the correct function

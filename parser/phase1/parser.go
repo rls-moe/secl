@@ -183,6 +183,8 @@ func (p *Parser) Step() error {
 			}
 			return trimString(value.(types.String)), nil
 		}
+	case lexer.TTComment:
+		return nil
 	default:
 		return errors.Errorf("Unknown Token %s: %+v", tok.Type, tok)
 	}

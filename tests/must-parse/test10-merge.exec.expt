@@ -1,0 +1,1 @@
+( //MAP //LIST exec:( //MAP //LIST merge/FUNCTION ( //MAP "hello"/STRING(0:0): ( //MAP //LIST "world"/STRING(30:36) ) //LIST 9/NUMBER_INTEGER ) ( //MAP "hi"/STRING(0:0): ( //MAP "hih"/STRING(0:0): ( //MAP "hi"/STRING(0:0): 10/NUMBER_INTEGER //LIST ) //LIST ) //LIST 16/NUMBER_INTEGER ) ( //MAP //LIST 20/NUMBER_INTEGER ) ) )

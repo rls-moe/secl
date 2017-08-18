@@ -28,6 +28,9 @@ func (q Query) Select(val types.Value) (types.Value, error) {
 		if err != nil {
 			return curVal, err
 		}
+		if nextVal == nil {
+			return nil, errors.Errorf("Query returned empty")
+		}
 		curVal = nextVal
 	}
 
@@ -45,6 +48,9 @@ func KeySelect(key string) PathSegment {
 func (m *mapKeySelect) Select(value types.Value) (types.Value, error) {
 	if value.Type() == types.TMapList {
 		ml := value.(*types.MapList)
+		if ml == nil {
+			return nil, errors.New("Map is nil")
+		}
 		v, ok := ml.Map[types.String{Value: m.Key}]
 		if !ok {
 			return nil, errors.Errorf("Key not present in map: %s", m.Key)
@@ -55,7 +61,7 @@ func (m *mapKeySelect) Select(value types.Value) (types.Value, error) {
 }
 
 type mapKeySelectDefault struct {
-	Key string
+	Key     string
 	Default types.Value
 }
 
@@ -74,7 +80,6 @@ func (m *mapKeySelectDefault) Select(value types.Value) (types.Value, error) {
 	}
 	return nil, errors.Errorf("Expected map but got %s for key %s", value.Type(), m.Key)
 }
-
 
 type listSelect struct {
 	Index int
@@ -96,7 +101,7 @@ func (l *listSelect) Select(value types.Value) (types.Value, error) {
 }
 
 type listSelectDefaultStruct struct {
-	Index int
+	Index   int
 	Default types.Value
 }
 
@@ -233,7 +238,7 @@ func (u UnmarshalQuery) Select(value types.Value) (types.Value, error) {
 	return NewUnmarshal(u.Target).Select(v2)
 }
 
-func (u UnmarshalQuery) Run(list *types.MapList) (error) {
+func (u UnmarshalQuery) Run(list *types.MapList) error {
 	_, err := u.Select(list)
 	return err
 }
