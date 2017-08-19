@@ -39,23 +39,23 @@ func merge(list *types.MapList) (types.Value, error) {
 func mergeIntoMap(prim, in *types.MapList) error {
 	// Merge maps
 	for k := range in.Map {
-		if v, ok := prim.Map[k]; !ok {
+		if _, ok := prim.Map[k]; !ok {
 			prim.Map[k] = in.Map[k]
 		} else {
-			if v.Type() == types.TMapList {
+			if in.Map[k].Type() == types.TMapList {
 				if prim.Map[k].Type() != types.TMapList {
 					return errors.New("Attempted to merge maplist into non-maplist")
 				} else {
 					// If both are a map, recurse into them
-					if err := mergeIntoMap(prim.Map[k].(*types.MapList), v.(*types.MapList)); err != nil {
+					if err := mergeIntoMap(prim.Map[k].(*types.MapList), in.Map[k].(*types.MapList)); err != nil {
 						return err
 					}
 				}
 			} else {
-				if prim.Map[k].Type() != v.Type() {
+				if prim.Map[k].Type() != in.Map[k].Type() {
 					return errors.New("Attempted to change type of existing value")
 				} else {
-					prim.Map[k] = v
+					prim.Map[k] = in.Map[k]
 				}
 			}
 		}

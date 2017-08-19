@@ -4,10 +4,13 @@
         0x09
     )
     (
+        hello: ("world2")
         hi: (hih: (hi: 10))
+        g: q
         0x10
     )
     (
+        g: a
         0x14
     )
 )
