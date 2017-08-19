@@ -2,10 +2,11 @@ package exec // import "go.rls.moe/secl/exec"
 import (
 	"github.com/pkg/errors"
 	"go.rls.moe/secl/lexer"
+	"go.rls.moe/secl/parser"
 	"go.rls.moe/secl/parser/phase1"
 	"go.rls.moe/secl/types"
 	"io/ioutil"
-	"go.rls.moe/secl/parser"
+	"os"
 )
 
 // loadv is a SECL Functions that loads a single value from a file, this is done by manually inducing the lexer and phase 1 parser, but not phase 2 and 3
@@ -67,6 +68,17 @@ func loadb(list *types.MapList) (types.Value, error) {
 }
 
 func subloadfile(filename string) (types.Value, error) {
+	stat, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		// If the file does not exist, return an empty map
+		return &types.MapList{
+			Map:  map[types.String]types.Value{},
+			List: []types.Value{},
+		}, nil
+	}
+	if stat.IsDir() {
+		return nil, errors.New("file was a directory")
+	}
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error reading file for load*")
