@@ -7,6 +7,7 @@ import (
 	"go.rls.moe/secl/types"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 // loadv is a SECL Functions that loads a single value from a file, this is done by manually inducing the lexer and phase 1 parser, but not phase 2 and 3
@@ -92,4 +93,40 @@ func loadf(list *types.MapList) (types.Value, error) {
 	}
 
 	return subloadfile(list.List[1].Literal())
+}
+
+func loadd(list *types.MapList) (types.Value, error) {
+	folder, ok := list.Map[types.String{Value:"dir"}]
+	if !ok {
+		folder = types.String{Value:"./conf.d"}
+	}
+	if folder.Type() != types.TString {
+		return nil, errors.New("Folder must be a string")
+	}
+	suffix, ok := list.Map[types.String{Value:"suffix"}]
+	if !ok {
+		folder = types.String{Value:".secl"}
+	}
+	if suffix.Type() != types.TString {
+		return nil, errors.New("Suffix must be a string")
+	}
+	files, err := filepath.Glob(filepath.Join(folder.(types.String).Value, "*" + suffix.(types.String).Value))
+	if err != nil {
+		return nil, err
+	}
+	var out = &types.MapList{
+		Map:  map[types.String]types.Value{},
+		List: []types.Value{
+			types.Function{Identifier:"merge"},
+		},
+		Executable: true,
+	}
+	for k := range files {
+		ml, err := subloadfile(files[k])
+		if err != nil {
+			return nil, errors.Wrapf(err, "Could not load file %s", files[k])
+		}
+		out.List = append(out.List, ml)
+	}
+	return out, nil
 }

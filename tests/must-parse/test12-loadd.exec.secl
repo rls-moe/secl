@@ -1,0 +1,1 @@
+!(loadd dir: ./tests/must-parse/conf.d suffix: .secl)

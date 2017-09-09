@@ -28,6 +28,7 @@ var functions = map[string]SECLFunc{
 	"loadv": loadv,
 	"loadb": loadb,
 	"loadf": loadf,
+	"loadd": loadd,
 	"merge": merge,
 }
 

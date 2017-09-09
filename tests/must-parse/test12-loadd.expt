@@ -1,0 +1,1 @@
+( //MAP //LIST ( //MAP "key1"/STRING(0:0): "value4"/STRING(6:11) "key2"/STRING(0:0): "value3"/STRING(6:11) //LIST nil/NIL "hello"/STRING(14:18) ) )
