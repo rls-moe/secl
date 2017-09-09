@@ -41,6 +41,7 @@ key: (
             (keys: are added)
             (a merge will never change a datatype, it will only overwrite existing keys if their types match)
         )
+        "loadd": !(loadd dir: "conf.d" suffix: "conf") // For when you need to load an entire directory of configs
     )
 )
 ```
@@ -155,12 +156,20 @@ Currently implemented functions:
 * `loadb` - Load binary data from a file
 * `loadf` - Load a single file as SECL and return the result maplist
 * `loadv` - Load single value (anything but a maplist) from a file
+* `loadd` - Load all files with a specific extension from a folder, specify files and location with `dir:` and `suffix:`
 * `decb64` - Decode base64 data
 * `merge` - Merge several maplists into one maplist, it does not accept any parameters except maplists. Maplists are merged in order, it is not allowed to change a datatype of an entry.
 
-Planned functions:
+## Planned Features
 
-* `loadd` - Load all files with a specific extension from a folder
+* `defmac` - Define Macros
+* `defvar` - Define Variables
+* `read` - Load a raw file string
+* `parse` - Load CSV, JSON, YAML, TOML, SECL data into SECL (using `read` for input)
+* `getnet` - Retrieve data from DNS and HTTP endpoints (ie, use TXT records to define configuration), usuable with `parse`
+* `shell` - Execute Programs, read Stdout, Stderr or both
+
+## Notes
 
 ### Merge Semantics
 
@@ -170,3 +179,30 @@ That means `!(merge (hello: world) (hello: 8))` is not valid and neither is `!(m
 
 Either one would mean that a query path would become invalid. This makes sure that an application can encode
 query paths without having to worry about wether a imported config file will make them invalid.
+
+## loadd Semantics
+
+`loadd` outputs a map with the merge function that contains a list of the SECL files found.
+
+If the files `file1.secl` and `file2.secl` contain the following:
+
+```
+--- file1.secl ---
+key1: value1
+!(nop)
+
+--- file2.secl ---
+key1: value2
+key2: value3
+```
+
+Then the output of loading both files via loadd results in:
+
+```
+key1: value2
+key2: value3
+nil
+```
+
+Files will be sorted depending on how filepath.Glob outputs them, which is in lexical order, so
+naming schemes like `10-config.secl` and `20-config.secl` will work as usual.
