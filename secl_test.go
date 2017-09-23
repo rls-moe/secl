@@ -1,15 +1,15 @@
 package secl
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
-	"go.rls.moe/secl/types"
-	"math/big"
-	"io/ioutil"
 	"github.com/stretchr/testify/require"
+	"go.rls.moe/secl/exec"
+	"go.rls.moe/secl/types"
+	"io/ioutil"
+	"math/big"
 	"path/filepath"
 	"strings"
-	"go.rls.moe/secl/exec"
+	"testing"
 )
 
 func TestParseBytes(t *testing.T) {
@@ -26,9 +26,9 @@ func TestParseBytes(t *testing.T) {
 	dmp := mapList.List[0].(*types.MapList)
 
 	assert.Len(dmp.Map, 1)
-	assert.EqualValues(types.String{Value: "world",PositionInformation: types.PositionInformation{Start:9,End:13}}, dmp.Map[types.String{Value:"hellO"}])
+	assert.EqualValues(types.String{Value: "world", PositionInformation: types.PositionInformation{Start: 9, End: 13}}, dmp.Map[types.String{Value: "hellO"}])
 	assert.Len(dmp.List, 1)
-	assert.EqualValues(&types.Bool{Value: false, PositionInformation: types.PositionInformation{Start:15,End:19}}, dmp.List[0])
+	assert.EqualValues(&types.Bool{Value: false, PositionInformation: types.PositionInformation{Start: 15, End: 19}}, dmp.List[0])
 }
 
 func TestParseString(t *testing.T) {
@@ -45,9 +45,9 @@ func TestParseString(t *testing.T) {
 	dmp := mapList.List[0].(*types.MapList)
 
 	assert.Len(dmp.Map, 1)
-	assert.EqualValues(types.String{Value: "world",PositionInformation: types.PositionInformation{Start:9,End:13}}, dmp.Map[types.String{Value:"hellO"}])
+	assert.EqualValues(types.String{Value: "world", PositionInformation: types.PositionInformation{Start: 9, End: 13}}, dmp.Map[types.String{Value: "hellO"}])
 	assert.Len(dmp.List, 1)
-	assert.EqualValues(&types.Bool{Value: false, PositionInformation: types.PositionInformation{Start:15,End:19}}, dmp.List[0])
+	assert.EqualValues(&types.Bool{Value: false, PositionInformation: types.PositionInformation{Start: 15, End: 19}}, dmp.List[0])
 }
 
 func TestMustParse(t *testing.T) {
@@ -60,7 +60,7 @@ func TestMustParse(t *testing.T) {
 			fp := filepath.Join("./tests/must-parse", file.Name())
 			data, err := ioutil.ReadFile(fp)
 			assert.NoError(err, "Must read test file")
-			fp2 := filepath.Join("./tests/must-parse", strings.TrimSuffix(file.Name(), ".secl") + ".expt")
+			fp2 := filepath.Join("./tests/must-parse", strings.TrimSuffix(file.Name(), ".secl")+".expt")
 			dataExpected, err := ioutil.ReadFile(fp2)
 			assert.NoError(err, "Must read expected output file")
 
@@ -83,7 +83,7 @@ func TestMustParse(t *testing.T) {
 				t.Logf("Output of Expanded Test %-36s: %s", file.Name(), types.PrintDebug(ml3))
 				t.Logf("Parsable Output of Expanded Test  %-26s: %s", file.Name(), types.PrintReproducableValue(ml3.(*types.MapList)))
 
-				fp3 := filepath.Join("./tests/must-parse", strings.TrimSuffix(file.Name(), ".exec.secl") + ".expt")
+				fp3 := filepath.Join("./tests/must-parse", strings.TrimSuffix(file.Name(), ".exec.secl")+".expt")
 				dataExpected, err := ioutil.ReadFile(fp3)
 
 				assert.NoError(err, "Must read expected expanded output file")

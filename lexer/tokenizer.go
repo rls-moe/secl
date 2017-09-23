@@ -115,7 +115,7 @@ func (t *Tokenizer) readChunk() (string, int, int) {
 
 func (t *Tokenizer) readNumber() (string, int, int) {
 	pos := t.pos
-	for isValidInNumber(t.curRune) || (t.pos - pos <= 3 && isValidAsSecondDigit(t.curRune)) {
+	for isValidInNumber(t.curRune) || (t.pos-pos <= 3 && isValidAsSecondDigit(t.curRune)) {
 		t.readChar()
 	}
 	return string(t.input[pos:t.pos]), pos, t.pos - 1

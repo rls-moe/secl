@@ -2,9 +2,9 @@ package helper // import "go.rls.moe/secl/helper"
 
 import (
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/binary"
 	"fmt"
-	"encoding/base64"
 )
 
 const (

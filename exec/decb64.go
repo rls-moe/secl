@@ -1,23 +1,23 @@
 package exec // import "go.rls.moe/secl/exec"
 
 import (
-	"go.rls.moe/secl/types"
-	"github.com/pkg/errors"
 	"encoding/base64"
+	"github.com/pkg/errors"
+	"go.rls.moe/secl/types"
 )
 
 func decb64(list *types.MapList) (types.Value, error) {
 	var useURL = true
 	var useRaw = true
 
-	if v, ok := list.Map[types.String{Value:"urlenc"}]; ok {
+	if v, ok := list.Map[types.String{Value: "urlenc"}]; ok {
 		if v.Type() != types.TBool {
 			return nil, errors.New("Parameter to urlenc must be boolean")
 		}
 		useURL = v.(*types.Bool).Value
 	}
 
-	if v, ok := list.Map[types.String{Value:"rawenc"}]; ok {
+	if v, ok := list.Map[types.String{Value: "rawenc"}]; ok {
 		if v.Type() != types.TBool {
 			return nil, errors.New("Parameter to rawenc must be boolean")
 		}

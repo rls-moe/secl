@@ -1,8 +1,8 @@
 package exec // import "go.rls.moe/secl/exec"
 
 import (
-	"go.rls.moe/secl/types"
 	"github.com/pkg/errors"
+	"go.rls.moe/secl/types"
 	"os"
 )
 
@@ -20,7 +20,7 @@ func init() {
 
 		val := os.Getenv(env.Literal())
 
-		defVal, useDefVal := list.Map[types.String{Value:"default"}]
+		defVal, useDefVal := list.Map[types.String{Value: "default"}]
 		if val == "" && useDefVal {
 			if defVal.Type() != types.TString {
 				return nil, errors.New("env default value must be a string")

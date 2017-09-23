@@ -8,11 +8,9 @@ type Value interface {
 	Type() Type
 }
 
-
 type IRandomized interface {
 	IsRandom() bool
 }
-
 
 type IPositionInformation interface {
 	Position() (int, int)

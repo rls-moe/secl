@@ -2,8 +2,8 @@ package exec // import "go.rls.moe/secl/exec"
 
 import (
 	"github.com/pkg/errors"
-	"go.rls.moe/secl/types"
 	"go.rls.moe/secl/lexer"
+	"go.rls.moe/secl/types"
 )
 
 // SECLFunc is a generic function to be executed in a SECL file
@@ -25,11 +25,11 @@ var functions = map[string]SECLFunc{
 		return types.Nil{}, nil
 	},
 	"decb64": decb64,
-	"loadv": loadv,
-	"loadb": loadb,
-	"loadf": loadf,
-	"loadd": loadd,
-	"merge": merge,
+	"loadv":  loadv,
+	"loadb":  loadb,
+	"loadf":  loadf,
+	"loadd":  loadd,
+	"merge":  merge,
 }
 
 // EvalMapList executes a MapList which has been marked executable with the correct function

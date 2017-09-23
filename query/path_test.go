@@ -2,27 +2,28 @@ package query
 
 import (
 	"github.com/stretchr/testify/require"
-	"go.rls.moe/secl"
 	"testing"
+	"go.rls.moe/secl/parser"
 )
 
 type UnmTest struct {
-	TestString string
-	TestInteger int
+	TestString   string
+	TestInteger  int
 	TestUInteger uint
-	TestFloat32 float32
-	TestFloat64 float64
-	TestBool bool
+	TestFloat32  float32
+	TestFloat64  float64
+	TestBool     bool
 }
 
 func TestQuery(t *testing.T) {
 	assert := require.New(t)
 
-	ml := secl.MustParseString(`a: (b: (c d yes) 8 9.91)`)
+	ml,err := parser.ParseString(`a: (b: (c d yes) 8 9.91)`)
+	assert.NoError(err)
 
 	test := UnmTest{}
 
-	err := NewUnmarshalWithQuery(&test.TestString,
+	err = NewUnmarshalWithQuery(&test.TestString,
 		KeySelect("a"),
 		KeySelect("b"),
 		ListSelect(1),

@@ -96,28 +96,28 @@ func loadf(list *types.MapList) (types.Value, error) {
 }
 
 func loadd(list *types.MapList) (types.Value, error) {
-	folder, ok := list.Map[types.String{Value:"dir"}]
+	folder, ok := list.Map[types.String{Value: "dir"}]
 	if !ok {
-		folder = types.String{Value:"./conf.d"}
+		folder = types.String{Value: "./conf.d"}
 	}
 	if folder.Type() != types.TString {
 		return nil, errors.New("Folder must be a string")
 	}
-	suffix, ok := list.Map[types.String{Value:"suffix"}]
+	suffix, ok := list.Map[types.String{Value: "suffix"}]
 	if !ok {
-		folder = types.String{Value:".secl"}
+		folder = types.String{Value: ".secl"}
 	}
 	if suffix.Type() != types.TString {
 		return nil, errors.New("Suffix must be a string")
 	}
-	files, err := filepath.Glob(filepath.Join(folder.(types.String).Value, "*" + suffix.(types.String).Value))
+	files, err := filepath.Glob(filepath.Join(folder.(types.String).Value, "*"+suffix.(types.String).Value))
 	if err != nil {
 		return nil, err
 	}
 	var out = &types.MapList{
-		Map:  map[types.String]types.Value{},
+		Map: map[types.String]types.Value{},
 		List: []types.Value{
-			types.Function{Identifier:"merge"},
+			types.Function{Identifier: "merge"},
 		},
 		Executable: true,
 	}

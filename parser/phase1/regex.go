@@ -55,7 +55,7 @@ func ConvertNumber(lit string) (types.Value, error) {
 			return nil, errors.Errorf("Could not parse integer (bin): %s", lit)
 		}
 		return &types.Integer{Value: bir}, nil
-	}  else if regexFloatSci.MatchString(lit) {
+	} else if regexFloatSci.MatchString(lit) {
 		matches := regexFloatSci.FindStringSubmatch(lit)
 		fpv := big.NewFloat(0.0)
 		_, ok := fpv.SetString(matches[2])

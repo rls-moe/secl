@@ -16,7 +16,7 @@ const (
 // rootNode is a List-based AST with no depth
 type rootNode struct {
 	FlatNodes []types.Value
-	ModNext func(value types.Value) (types.Value, error)
+	ModNext   func(value types.Value) (types.Value, error)
 }
 
 // Append puts the given value at the end of the current AST

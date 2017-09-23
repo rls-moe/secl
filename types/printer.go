@@ -1,7 +1,7 @@
 package types // import "go.rls.moe/secl/types"
 import (
-	"sort"
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -97,10 +97,9 @@ func PrintDebug(p Value) string {
 			str += "/" + string(p.Type())
 		}
 		if v, ok := p.(IPositionInformation); ok {
-			s,e := v.Position()
+			s, e := v.Position()
 			str += fmt.Sprintf("(%d:%d)", s, e)
 		}
 		return str
 	}
 }
-

@@ -2,9 +2,9 @@ package phase3 // import "go.rls.moe/secl/parser/phase3"
 
 import (
 	"github.com/pkg/errors"
+	"go.rls.moe/secl/lexer"
 	"go.rls.moe/secl/parser/phase1"
 	"go.rls.moe/secl/types"
-	"go.rls.moe/secl/lexer"
 )
 
 // ErrKeyAtEnd indicates that a key was the last element of a list, which means it has no value to associate with.

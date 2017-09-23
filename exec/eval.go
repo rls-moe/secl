@@ -1,13 +1,14 @@
 package exec // import "go.rls.moe/secl/exec"
 
 import (
-	"go.rls.moe/secl/types"
 	"github.com/pkg/errors"
+	"go.rls.moe/secl/types"
 )
 
 var (
 	ErrNoMapList = errors.New("Input was not a maplist")
 )
+
 func stepEval(value types.Value) (types.Value, error) {
 	if value.Type() != types.TMapList {
 		return nil, ErrNoMapList
