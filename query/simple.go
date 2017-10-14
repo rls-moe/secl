@@ -27,6 +27,9 @@ func SimpleUnmarshal(ml *types.MapList, target interface{}, path string) error {
 
 // SimpleStructUnmarshal accepts a struct and will unmarshal the maplist using the struct tags
 func SimpleStructUnmarshal(ml *types.MapList, target interface{}) error {
+	if unmarshaller, ok := target.(SECLUnmarshal); ok {
+		return unmarshaller.UnmarshalSECL(ml)
+	}
 	valueOfTarget := reflect.ValueOf(target).Elem()
 	typeOfTarget := reflect.TypeOf(target).Elem()
 
