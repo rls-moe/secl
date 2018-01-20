@@ -54,6 +54,10 @@ Most features are now part of the reference implementation in this repository. T
 
 A non-formal specification can be found at [hackmd](https://hackmd.io/s/rylGmiXr-) or in this repository under SPECS.md (hackmd might be more up-to-date than SPECS.md)
 
+### Breaking Changes
+
+Version `v0.9.5` will break serialization as the string type will now escape it's literal output on it's own. If you rely on Literal() to read a string, keep this in mind. This version also changes some semantics inside the parser which might lead to unexpected results in various applications but it should largely remain compatible with existing code.
+
 ## Introduction
 
 ### Strings

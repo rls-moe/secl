@@ -33,6 +33,29 @@ func (p PositionInformation) Position() (int, int) {
 	return p.Start, p.End
 }
 
+// Metadata presents various non-standard data to the parser/lexer/user
+type Metadata map[string][]string
+
+func (m Metadata) Has(key string) bool {
+	_, ok := m[key]
+	return ok
+}
+
+func (m Metadata) Add(key string, val ...string) {
+	if v, ok := m[key]; !ok || v == nil {
+		m[key] = []string{}
+	}
+	m[key] = append(m[key], val...)
+}
+
+func (m Metadata) Set(key string, val ...string) {
+	m[key] = val
+}
+
+func (m Metadata) Del(key string) {
+	m.Set(key)
+}
+
 // String is a text value
 type String struct {
 	Randomized
@@ -40,7 +63,7 @@ type String struct {
 	Value string
 }
 
-var _ Value = String{} // Assert that String is a Value
+var _ Value = &String{} // Assert that String is a Value
 
 // Bool is either true or false
 type Bool struct {

@@ -1,6 +1,7 @@
 package phase1 // import "go.rls.moe/secl/parser/phase1"
 
 import (
+	"github.com/pkg/errors"
 	"go.rls.moe/secl/types"
 )
 
@@ -54,6 +55,8 @@ func (MapBegin) Literal() string {
 	return string(TMapBegin)
 }
 
+func (MapBegin) FromLiteral(string) error { return errors.New("Phase1 types cannot be deserialized") }
+
 // Type returns TMapBegin
 func (MapBegin) Type() types.Type {
 	return TMapBegin
@@ -68,6 +71,8 @@ type MapEnd struct{}
 func (MapEnd) Literal() string {
 	return string(TMapEnd)
 }
+
+func (MapEnd) FromLiteral(string) error { return errors.New("Phase1 types cannot be deserialized") }
 
 // Type returns TMapEnd
 func (MapEnd) Type() types.Type {
@@ -85,6 +90,8 @@ type MapKey struct {
 func (m MapKey) Literal() string {
 	return "[" + m.Value.Value + ":]"
 }
+
+func (MapKey) FromLiteral(string) error { return errors.New("Phase1 types cannot be deserialized") }
 
 // Type returns TMapKey
 func (MapKey) Type() types.Type {
@@ -108,6 +115,8 @@ func (EmptyMap) Literal() string {
 	return string(TMapEmpty)
 }
 
+func (EmptyMap) FromLiteral(string) error { return errors.New("Phase1 types cannot be deserialized") }
+
 // Type returns TMapEmpty
 func (EmptyMap) Type() types.Type {
 	return TMapEmpty
@@ -122,6 +131,8 @@ type ExecMap struct{}
 func (ExecMap) Literal() string {
 	return string(TMapExec)
 }
+
+func (ExecMap) FromLiteral(string) error { return errors.New("Phase1 types cannot be deserialized") }
 
 // Type returns TMapExec
 func (ExecMap) Type() types.Type {

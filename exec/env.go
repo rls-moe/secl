@@ -1,9 +1,10 @@
 package exec // import "go.rls.moe/secl/exec"
 
 import (
+	"os"
+
 	"github.com/pkg/errors"
 	"go.rls.moe/secl/types"
-	"os"
 )
 
 func init() {
@@ -28,6 +29,6 @@ func init() {
 			val = defVal.Literal()
 		}
 
-		return types.String{Value: val}, nil
+		return &types.String{Value: val}, nil
 	})
 }

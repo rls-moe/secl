@@ -1,10 +1,10 @@
-package phase1 // import "go.rls.moe/secl/parser/phase1"
+package types
 
 import (
-	"github.com/pkg/errors"
-	"go.rls.moe/secl/types"
 	"math/big"
 	"regexp"
+
+	"github.com/pkg/errors"
 )
 
 var (
@@ -19,42 +19,42 @@ var (
 
 // ConvertNumber will check the incoming literal against the internal regex list and
 // parse it using the correct converted, returning the types.Value interface.
-func ConvertNumber(lit string) (types.Value, error) {
+func ConvertNumber(lit string) (Value, error) {
 	if regexIntegerDecimal.MatchString(lit) {
 		bi := big.NewInt(0)
 		bir, ok := bi.SetString(lit, 10)
 		if !ok {
 			return nil, errors.Errorf("Could not parse integer (dec): %s", lit)
 		}
-		return &types.Integer{Value: bir}, nil
+		return &Integer{Value: bir}, nil
 	} else if regexFloatDecimal.MatchString(lit) {
 		bf := big.NewFloat(0)
 		bfr, ok := bf.SetString(lit)
 		if !ok {
 			return nil, errors.Errorf("Could not parse float (dec): %s", lit)
 		}
-		return &types.Float{Value: bfr}, nil
+		return &Float{Value: bfr}, nil
 	} else if regexIntegerOct.MatchString(lit) {
 		bi := big.NewInt(0)
 		bir, ok := bi.SetString(lit[2:], 8)
 		if !ok {
 			return nil, errors.Errorf("Could not parse integer (oct): %s", lit)
 		}
-		return &types.Integer{Value: bir}, nil
+		return &Integer{Value: bir}, nil
 	} else if regexIntegerHex.MatchString(lit) {
 		bi := big.NewInt(0)
 		bir, ok := bi.SetString(lit[2:], 16)
 		if !ok {
 			return nil, errors.Errorf("Could not parse integer (hex): %s", lit)
 		}
-		return &types.Integer{Value: bir}, nil
+		return &Integer{Value: bir}, nil
 	} else if regexIntegerBin.MatchString(lit) {
 		bi := big.NewInt(0)
 		bir, ok := bi.SetString(lit[2:], 2)
 		if !ok {
 			return nil, errors.Errorf("Could not parse integer (bin): %s", lit)
 		}
-		return &types.Integer{Value: bir}, nil
+		return &Integer{Value: bir}, nil
 	} else if regexFloatSci.MatchString(lit) {
 		matches := regexFloatSci.FindStringSubmatch(lit)
 		fpv := big.NewFloat(0.0)
@@ -78,7 +78,7 @@ func ConvertNumber(lit string) (types.Value, error) {
 			fpev.Mul(fpev, big.NewFloat(10.0))
 			fpe.Sub(fpe, big.NewInt(1))
 		}
-		return &types.Float{Value: fpv.Mul(fpv, fpev)}, nil
+		return &Float{Value: fpv.Mul(fpv, fpev)}, nil
 	} else if regexFloatExp.MatchString(lit) {
 		matches := regexFloatExp.FindStringSubmatch(lit)
 		fpv := big.NewFloat(0.0)
@@ -102,7 +102,7 @@ func ConvertNumber(lit string) (types.Value, error) {
 			fpev.Mul(fpev, big.NewFloat(10.0))
 			fpe.Sub(fpe, big.NewInt(1))
 		}
-		return &types.Float{Value: fpv.Mul(fpv, fpev)}, nil
+		return &Float{Value: fpv.Mul(fpv, fpev)}, nil
 	}
 	return nil, errors.Errorf("Number did not match any known format: %s", lit)
 }

@@ -1,13 +1,14 @@
 package exec // import "go.rls.moe/secl/exec"
 import (
+	"io/ioutil"
+	"os"
+	"path/filepath"
+
 	"github.com/pkg/errors"
 	"go.rls.moe/secl/lexer"
 	"go.rls.moe/secl/parser"
 	"go.rls.moe/secl/parser/phase1"
 	"go.rls.moe/secl/types"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 )
 
 // loadv is a SECL Functions that loads a single value from a file, this is done by manually inducing the lexer and phase 1 parser, but not phase 2 and 3
@@ -98,19 +99,19 @@ func loadf(list *types.MapList) (types.Value, error) {
 func loadd(list *types.MapList) (types.Value, error) {
 	folder, ok := list.Map[types.String{Value: "dir"}]
 	if !ok {
-		folder = types.String{Value: "./conf.d"}
+		folder = &types.String{Value: "./conf.d"}
 	}
 	if folder.Type() != types.TString {
 		return nil, errors.New("Folder must be a string")
 	}
 	suffix, ok := list.Map[types.String{Value: "suffix"}]
 	if !ok {
-		folder = types.String{Value: ".secl"}
+		folder = &types.String{Value: ".secl"}
 	}
 	if suffix.Type() != types.TString {
 		return nil, errors.New("Suffix must be a string")
 	}
-	files, err := filepath.Glob(filepath.Join(folder.(types.String).Value, "*"+suffix.(types.String).Value))
+	files, err := filepath.Glob(filepath.Join(folder.(*types.String).Value, "*"+suffix.(*types.String).Value))
 	if err != nil {
 		return nil, err
 	}

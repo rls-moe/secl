@@ -21,6 +21,10 @@ func (*p3Empty) Literal() string {
 	return string(tp3Empty)
 }
 
+func (*p3Empty) FromLiteral(string) error {
+	return errors.New("Phase 3 Empty cannot be deserialized")
+}
+
 func (*p3Empty) Type() types.Type {
 	return tp3Empty
 }

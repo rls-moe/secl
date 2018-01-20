@@ -1,10 +1,11 @@
 package parser
 
 import (
-	"github.com/stretchr/testify/assert"
-	"go.rls.moe/secl/types"
 	"math/big"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"go.rls.moe/secl/types"
 )
 
 func TestParseString(t *testing.T) {
@@ -28,10 +29,10 @@ func TestParseString(t *testing.T) {
 						Map: map[types.String]types.Value{
 							types.String{Value: "test2"}: &types.MapList{Map: map[types.String]types.Value{}, List: []types.Value{}},
 							types.String{Value: "test3"}: &types.MapList{Map: map[types.String]types.Value{}, List: []types.Value{}},
-							types.String{Value: "test5"}: types.String{Value: "hallo welt", PositionInformation: types.PositionInformation{50, 61}},
+							types.String{Value: "test5"}: &types.String{Value: "hallo welt", PositionInformation: types.PositionInformation{50, 61}},
 						},
 						List: []types.Value{
-							types.String{Value: "hello", PositionInformation: types.PositionInformation{9, 13}},
+							&types.String{Value: "hello", PositionInformation: types.PositionInformation{9, 13}},
 							&types.Bool{Value: true, PositionInformation: types.PositionInformation{38, 41}},
 							&types.MapList{
 								Executable: true,

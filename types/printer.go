@@ -24,7 +24,7 @@ func PrintValue(p Value) string {
 		sort.Strings(keys)
 
 		for k := range keys {
-			out += PrintValue(String{Value: keys[k]}) + ": " + PrintValue(q.Map[String{Value: keys[k]}]) + " "
+			out += PrintValue(&String{Value: keys[k]}) + ": " + PrintValue(q.Map[String{Value: keys[k]}]) + " "
 		}
 
 		for k := range q.List {
@@ -33,7 +33,7 @@ func PrintValue(p Value) string {
 
 		return out + ")"
 	case TString:
-		return fmt.Sprintf("%q", p.Literal())
+		return fmt.Sprintf("\"%s\"", p.Literal())
 	default:
 		return fmt.Sprintf("%s", p.Literal())
 	}
@@ -68,7 +68,7 @@ func PrintDebug(p Value) string {
 		out += "//MAP "
 
 		for k := range keys {
-			out += PrintDebug(String{Value: keys[k]}) + ": " + PrintDebug(q.Map[String{Value: keys[k]}]) + " "
+			out += PrintDebug(&String{Value: keys[k]}) + ": " + PrintDebug(q.Map[String{Value: keys[k]}]) + " "
 		}
 
 		out += "//LIST "
@@ -83,8 +83,8 @@ func PrintDebug(p Value) string {
 		if v, ok := p.(IRandomized); ok && v.IsRandom() {
 			str += "{RANDOM}"
 		} else {
-			if _, ok := p.(String); ok {
-				str += fmt.Sprintf("%q", p.Literal())
+			if _, ok := p.(*String); ok {
+				str += fmt.Sprintf("\"%s\"", p.Literal())
 			} else if v, ok := p.(DebugValue); ok {
 				str += v.DebugPrint()
 			} else {

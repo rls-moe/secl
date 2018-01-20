@@ -1,12 +1,13 @@
 package phase1 // import "go.rls.moe/secl/parser/phase1"
 
 import (
+	"io"
+	"strings"
+
 	"github.com/pkg/errors"
 	"go.rls.moe/secl/helper"
 	"go.rls.moe/secl/lexer"
 	"go.rls.moe/secl/types"
-	"io"
-	"strings"
 )
 
 // AST is a shorthand for *rootNode, an internal type, which is exported here
@@ -71,17 +72,13 @@ func (p *Parser) Step() error {
 
 	switch tok.Type {
 	case lexer.TTBool:
-		b := &types.Bool{}
-		b.PositionInformation = types.PositionInformation{tok.Start, tok.End}
-		if tok.Literal == "true" || tok.Literal == "on" || tok.Literal == "allow" || tok.Literal == "yes" {
-			b.Value = true
-		} else if tok.Literal == "false" || tok.Literal == "off" || tok.Literal == "deny" || tok.Literal == "no" {
-			b.Value = false
-		} else if tok.Literal == "maybe" {
-			b.Value = helper.RndFloat() > 0.501
-			b.Randomized = types.Randomized{Random: true}
-		} else {
-			return errors.Errorf("Wanted a boolean value but got %q, %+v", tok.Literal, tok)
+		b := &types.Bool{
+			PositionInformation: types.PositionInformation{
+				Start: tok.Start, End: tok.End,
+			},
+		}
+		if err := b.FromLiteral(tok.Literal); err != nil {
+			return err
 		}
 		if err := p.FlatAST.Append(b); err != nil {
 			return err
@@ -103,28 +100,27 @@ func (p *Parser) Step() error {
 			return err
 		}
 	case lexer.TTString:
-		replacer := strings.NewReplacer(
-			"\\n", "\n",
-			"\\t", "\t",
-			"\\\"", "\"",
-			"\\\\", "\\",
-		)
-		tok.Literal = replacer.Replace(tok.Literal)
-		if err := p.FlatAST.Append(types.String{
-			Value: tok.Literal,
+		s := &types.String{
 			PositionInformation: types.PositionInformation{
 				Start: tok.Start, End: tok.End,
 			},
-		}); err != nil {
+		}
+		if err := s.FromLiteral(tok.Literal); err != nil {
+			return err
+		}
+		if err := p.FlatAST.Append(s); err != nil {
 			return err
 		}
 	case lexer.TTSingleWordString:
-		if err := p.FlatAST.Append(types.String{
-			Value: tok.Literal,
+		str := &types.String{
 			PositionInformation: types.PositionInformation{
 				Start: tok.Start, End: tok.End,
 			},
-		}); err != nil {
+		}
+		if err := str.FromLiteral(tok.Literal); err != nil {
+			return err
+		}
+		if err := p.FlatAST.Append(str); err != nil {
 			return nil
 		}
 	case lexer.TTModExecMap:
@@ -136,22 +132,29 @@ func (p *Parser) Step() error {
 			return err
 		}
 	case lexer.TTNumber:
-		val, err := ConvertNumber(tok.Literal)
+		i := &types.Integer{}
+		err := i.FromLiteral(tok.Literal)
 		if err != nil {
-			return errors.Wrapf(err, "Could not convert token %q at position %d-%d",
-				tok.Literal, tok.Start, tok.End)
-		}
-		if err := p.FlatAST.Append(val); err != nil {
+			f := &types.Float{}
+			err := f.FromLiteral(tok.Literal)
+			if err != nil {
+				return errors.Wrapf(err, "Could not convert token %q at position %d-%d",
+					tok.Literal, tok.Start, tok.End)
+			}
+			if err := p.FlatAST.Append(f); err != nil {
+				return err
+			}
+		} else if err := p.FlatAST.Append(i); err != nil {
 			return err
 		}
 	case lexer.TTModMapKey:
 		if err := p.FlatAST.ReplaceLast(func(in types.Value) (types.Value, error) {
 			if in.Type() != types.TString {
-				return nil, errors.New("Wanted string AST node")
+				return nil, errors.Errorf("Wanted string AST node got %s", in.Type())
 			}
-			str := in.(types.String)
+			str := in.(*types.String)
 			return &MapKey{
-				Value: str,
+				Value: *str,
 			}, nil
 		}); err != nil {
 			return errors.Wrap(err, "Could not replace value")
@@ -167,7 +170,7 @@ func (p *Parser) Step() error {
 		} else if strings.HasSuffix(tok.Literal, "256") {
 			length = 64
 		}
-		if err := p.FlatAST.Append(types.String{
+		if err := p.FlatAST.Append(&types.String{
 			Value:               helper.RndStr(length),
 			PositionInformation: types.PositionInformation{tok.Start, tok.End},
 			Randomized:          types.Randomized{Random: true},
@@ -181,7 +184,7 @@ func (p *Parser) Step() error {
 			if value.Type() != types.TString {
 				return nil, errors.Errorf("TrimString modification was not followed by a string but by %s", value.Type())
 			}
-			return trimString(value.(types.String)), nil
+			return trimString(value.(*types.String)), nil
 		}
 	case lexer.TTComment:
 		return nil
@@ -202,7 +205,7 @@ func (p *Parser) Output() *AST {
 	return q
 }
 
-func trimString(s types.String) types.String {
+func trimString(s *types.String) *types.String {
 	s.Value = strings.TrimSpace(s.Value)
 	return s
 }

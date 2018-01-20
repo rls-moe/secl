@@ -1,15 +1,16 @@
 package secl
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"go.rls.moe/secl/exec"
-	"go.rls.moe/secl/types"
 	"io/ioutil"
 	"math/big"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.rls.moe/secl/exec"
+	"go.rls.moe/secl/types"
 )
 
 func TestParseBytes(t *testing.T) {
@@ -26,7 +27,7 @@ func TestParseBytes(t *testing.T) {
 	dmp := mapList.List[0].(*types.MapList)
 
 	assert.Len(dmp.Map, 1)
-	assert.EqualValues(types.String{Value: "world", PositionInformation: types.PositionInformation{Start: 9, End: 13}}, dmp.Map[types.String{Value: "hellO"}])
+	assert.EqualValues(&types.String{Value: "world", PositionInformation: types.PositionInformation{Start: 9, End: 13}}, dmp.Map[types.String{Value: "hellO"}])
 	assert.Len(dmp.List, 1)
 	assert.EqualValues(&types.Bool{Value: false, PositionInformation: types.PositionInformation{Start: 15, End: 19}}, dmp.List[0])
 }
@@ -45,7 +46,7 @@ func TestParseString(t *testing.T) {
 	dmp := mapList.List[0].(*types.MapList)
 
 	assert.Len(dmp.Map, 1)
-	assert.EqualValues(types.String{Value: "world", PositionInformation: types.PositionInformation{Start: 9, End: 13}}, dmp.Map[types.String{Value: "hellO"}])
+	assert.EqualValues(&types.String{Value: "world", PositionInformation: types.PositionInformation{Start: 9, End: 13}}, dmp.Map[types.String{Value: "hellO"}])
 	assert.Len(dmp.List, 1)
 	assert.EqualValues(&types.Bool{Value: false, PositionInformation: types.PositionInformation{Start: 15, End: 19}}, dmp.List[0])
 }
@@ -74,7 +75,7 @@ func TestMustParse(t *testing.T) {
 			ml2, err := ParseString(types.PrintReproducableValue(ml))
 			assert.NoError(err)
 
-			assert.Equal(types.PrintValue(ml), types.PrintValue(ml2))
+			assert.Equal(types.PrintValue(ml), types.PrintValue(ml2), "Must match reproduced value")
 
 			if strings.HasSuffix(file.Name(), ".exec.secl") {
 				ml3, err := exec.Eval(ml)
