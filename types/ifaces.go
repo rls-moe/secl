@@ -11,14 +11,14 @@ type Value interface {
 	Type() Type
 }
 
+// IRandomized indicates the underlying type contains random data and any debug
+// output should indicate this and not produce the actual random value
 type IRandomized interface {
 	IsRandom() bool
 }
 
-type IPositionInformation interface {
-	Position() (int, int)
-}
-
+// DebugValue indicates the type has it's own debug output function and the default
+// string literal function should not be used
 type DebugValue interface {
 	DebugPrint() string
 }

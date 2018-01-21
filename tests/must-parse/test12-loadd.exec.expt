@@ -1,1 +1,1 @@
-( //MAP //LIST exec:( //MAP "dir"/STRING(0:0): "./tests/must-parse/conf.d"/STRING(13:37) "suffix"/STRING(0:0): ".secl"/STRING(47:51) //LIST loadd/FUNCTION ) )
+( //MAP //LIST exec:( //MAP "dir"/STRING: "./tests/must-parse/conf.d"/STRING "suffix"/STRING: ".secl"/STRING //LIST loadd/FUNCTION ) )

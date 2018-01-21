@@ -2,6 +2,7 @@ package exec // import "go.rls.moe/secl/exec"
 
 import (
 	"os"
+	"strings"
 
 	"github.com/pkg/errors"
 	"go.rls.moe/secl/types"
@@ -23,10 +24,26 @@ func init() {
 
 		defVal, useDefVal := list.Map[types.String{Value: "default"}]
 		if val == "" && useDefVal {
-			if defVal.Type() != types.TString {
-				return nil, errors.New("env default value must be a string")
-			}
 			val = defVal.Literal()
+		}
+
+		if tVal, ok := list.Map[types.String{Value: "type"}]; ok {
+			var t types.Type
+			switch strings.ToLower(tVal.Literal()) {
+			case "integer":
+				t = types.TInteger
+			case "float":
+				fallthrough
+			case "number":
+				t = types.TFloat
+			case "bool":
+				t = types.TBool
+			case "string":
+				t = types.TString
+			default:
+				return nil, errors.Errorf("type %s for env parameter is unknown", tVal.Literal())
+			}
+			return types.CoerceType(&types.String{Value: val}, t)
 		}
 
 		return &types.String{Value: val}, nil

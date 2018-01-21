@@ -1,6 +1,8 @@
 package exec // import "go.rls.moe/secl/exec"
 
 import (
+	"strings"
+
 	"github.com/pkg/errors"
 	"go.rls.moe/secl/types"
 )
@@ -24,21 +26,19 @@ func init() {
 			return nil, errors.New(functionNameConvertType + " target must be a string value")
 		}
 		targetTypeS := targetType.(*types.String)
-		var targetVal types.Value
-		switch targetTypeS.Value {
+		var targetTypeT types.Type
+		switch strings.ToLower(targetTypeS.Value) {
 		case "string":
-			targetVal = new(types.String)
+			targetTypeT = types.TString
 		case "integer":
-			targetVal = new(types.Integer)
-		case "number":
-			targetVal = new(types.Float)
+			targetTypeT = types.TInteger
 		case "float":
-			targetVal = new(types.Float)
-		case "boolean":
-			targetVal = new(types.Bool)
-		default:
-			return nil, errors.New(functionNameConvertType + ": unrecognized type value; must be one of 'string, integer, number, boolean'")
+			fallthrough
+		case "number":
+			targetTypeT = types.TFloat
+		case "bool":
+			targetTypeT = types.TBool
 		}
-		return targetVal, targetVal.FromLiteral(val.Literal())
+		return types.CoerceType(val, targetTypeT)
 	})
 }

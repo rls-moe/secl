@@ -27,9 +27,9 @@ func TestParseBytes(t *testing.T) {
 	dmp := mapList.List[0].(*types.MapList)
 
 	assert.Len(dmp.Map, 1)
-	assert.EqualValues(&types.String{Value: "world", PositionInformation: types.PositionInformation{Start: 9, End: 13}}, dmp.Map[types.String{Value: "hellO"}])
+	assert.EqualValues(&types.String{Value: "world"}, dmp.Map[types.String{Value: "hellO"}])
 	assert.Len(dmp.List, 1)
-	assert.EqualValues(&types.Bool{Value: false, PositionInformation: types.PositionInformation{Start: 15, End: 19}}, dmp.List[0])
+	assert.EqualValues(&types.Bool{Value: false}, dmp.List[0])
 }
 
 func TestParseString(t *testing.T) {
@@ -46,9 +46,9 @@ func TestParseString(t *testing.T) {
 	dmp := mapList.List[0].(*types.MapList)
 
 	assert.Len(dmp.Map, 1)
-	assert.EqualValues(&types.String{Value: "world", PositionInformation: types.PositionInformation{Start: 9, End: 13}}, dmp.Map[types.String{Value: "hellO"}])
+	assert.EqualValues(&types.String{Value: "world"}, dmp.Map[types.String{Value: "hellO"}])
 	assert.Len(dmp.List, 1)
-	assert.EqualValues(&types.Bool{Value: false, PositionInformation: types.PositionInformation{Start: 15, End: 19}}, dmp.List[0])
+	assert.EqualValues(&types.Bool{Value: false}, dmp.List[0])
 }
 
 func TestMustParse(t *testing.T) {

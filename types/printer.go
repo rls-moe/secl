@@ -96,10 +96,6 @@ func PrintDebug(p Value) string {
 		} else {
 			str += "/" + string(p.Type())
 		}
-		if v, ok := p.(IPositionInformation); ok {
-			s, e := v.Position()
-			str += fmt.Sprintf("(%d:%d)", s, e)
-		}
 		return str
 	}
 }

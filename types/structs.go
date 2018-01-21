@@ -17,30 +17,27 @@ const (
 	TBinary        = "BINARY"
 )
 
+// Randomized should be embedded if a struct contains random information
 type Randomized struct {
 	Random bool
 }
 
+// IsRandom returns true if the container it belongs to contains random
+// data
 func (r Randomized) IsRandom() bool {
 	return r.Random
-}
-
-type PositionInformation struct {
-	Start, End int
-}
-
-func (p PositionInformation) Position() (int, int) {
-	return p.Start, p.End
 }
 
 // Metadata presents various non-standard data to the parser/lexer/user
 type Metadata map[string][]string
 
+// Has returns true if the key is present in the metadata
 func (m Metadata) Has(key string) bool {
 	_, ok := m[key]
 	return ok
 }
 
+// Add will append the given values to the metadata container
 func (m Metadata) Add(key string, val ...string) {
 	if v, ok := m[key]; !ok || v == nil {
 		m[key] = []string{}
@@ -48,6 +45,8 @@ func (m Metadata) Add(key string, val ...string) {
 	m[key] = append(m[key], val...)
 }
 
+// Set will clear all current metadata on the key and set it to the given
+// values
 func (m Metadata) Set(key string, val ...string) {
 	m[key] = val
 }
@@ -59,7 +58,6 @@ func (m Metadata) Del(key string) {
 // String is a text value
 type String struct {
 	Randomized
-	PositionInformation
 	Value string
 }
 
@@ -68,7 +66,6 @@ var _ Value = &String{} // Assert that String is a Value
 // Bool is either true or false
 type Bool struct {
 	Randomized
-	PositionInformation
 	Value bool
 }
 

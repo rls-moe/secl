@@ -72,11 +72,7 @@ func (p *Parser) Step() error {
 
 	switch tok.Type {
 	case lexer.TTBool:
-		b := &types.Bool{
-			PositionInformation: types.PositionInformation{
-				Start: tok.Start, End: tok.End,
-			},
-		}
+		b := &types.Bool{}
 		if err := b.FromLiteral(tok.Literal); err != nil {
 			return err
 		}
@@ -100,11 +96,7 @@ func (p *Parser) Step() error {
 			return err
 		}
 	case lexer.TTString:
-		s := &types.String{
-			PositionInformation: types.PositionInformation{
-				Start: tok.Start, End: tok.End,
-			},
-		}
+		s := &types.String{}
 		if err := s.FromLiteral(tok.Literal); err != nil {
 			return err
 		}
@@ -112,11 +104,7 @@ func (p *Parser) Step() error {
 			return err
 		}
 	case lexer.TTSingleWordString:
-		str := &types.String{
-			PositionInformation: types.PositionInformation{
-				Start: tok.Start, End: tok.End,
-			},
-		}
+		str := &types.String{}
 		if err := str.FromLiteral(tok.Literal); err != nil {
 			return err
 		}
@@ -171,9 +159,8 @@ func (p *Parser) Step() error {
 			length = 64
 		}
 		if err := p.FlatAST.Append(&types.String{
-			Value:               helper.RndStr(length),
-			PositionInformation: types.PositionInformation{tok.Start, tok.End},
-			Randomized:          types.Randomized{Random: true},
+			Value:      helper.RndStr(length),
+			Randomized: types.Randomized{Random: true},
 		}); err != nil {
 			return err
 		}
