@@ -8,22 +8,34 @@ import (
 )
 
 const functionNameConvertType = "=>type"
+const functionNameConverTypeShort = "=>T"
 
 func init() {
-	RegisterFunction(functionNameConvertType, func(list *types.MapList) (types.Value, error) {
-		if len(list.List) != 2 {
-			return nil, errors.New(functionNameConvertType + " needs 1 parameter")
-		}
+	fun := func(list *types.MapList) (types.Value, error) {
+		funName := list.List[0].(types.Function).Identifier
 
-		val := list.List[1]
+		var (
+			val        types.Value
+			targetType types.Value
+		)
 
-		targetType, ok := list.Map[types.String{Value: "type"}]
+		if len(list.List) == 2 {
+			val = list.List[1]
 
-		if !ok {
-			return nil, errors.New(functionNameConvertType + " expects a target type")
+			var ok bool
+			targetType, ok = list.Map[types.String{Value: "type"}]
+
+			if !ok && len(list.List) == 2 {
+				return nil, errors.New(funName + " expects a target type")
+			}
+		} else if len(list.List) == 3 {
+			targetType = list.List[1]
+			val = list.List[2]
+		} else {
+			return nil, errors.New(funName + " needs 1 parameter (type) or two arguments")
 		}
 		if targetType.Type() != types.TString {
-			return nil, errors.New(functionNameConvertType + " target must be a string value")
+			return nil, errors.New(funName + " target must be a string value")
 		}
 		targetTypeS := targetType.(*types.String)
 		var targetTypeT types.Type
@@ -40,5 +52,7 @@ func init() {
 			targetTypeT = types.TBool
 		}
 		return types.CoerceType(val, targetTypeT)
-	})
+	}
+	RegisterFunction(functionNameConvertType, fun)
+	RegisterFunction(functionNameConverTypeShort, fun)
 }

@@ -1,9 +1,10 @@
 package query // import "go.rls.moe/secl/query"
 
 import (
+	"reflect"
+
 	"github.com/pkg/errors"
 	"go.rls.moe/secl/types"
-	"reflect"
 )
 
 type PathSegment interface {
@@ -170,7 +171,17 @@ func NewUnmarshal(target interface{}) Unmarshal {
 }
 
 func (u Unmarshal) Select(value types.Value) (types.Value, error) {
+
+	if v, ok := u.Target.(SECLUnmarshal); ok {
+		return nil, v.UnmarshalSECL(value)
+	}
+
+	if v, ok := u.Target.(PathSegment); ok {
+		return v.Select(value)
+	}
+
 	rv := reflect.ValueOf(u.Target)
+
 	if rv.Kind() != reflect.Ptr || rv.IsNil() {
 		return nil, errors.Errorf("Expected a pointer not a %s for unmarshalling", rv.Kind().String())
 	}
@@ -200,14 +211,6 @@ func (u Unmarshal) Select(value types.Value) (types.Value, error) {
 		f, _ := value.(*types.Float).Value.Float64()
 		rvp.SetFloat(f)
 		return value, nil
-	}
-
-	if v, ok := u.Target.(SECLUnmarshal); ok {
-		return nil, v.UnmarshalSECL(value)
-	}
-
-	if v, ok := u.Target.(PathSegment); ok {
-		return v.Select(value)
 	}
 
 	return nil, errors.Errorf("Could not unmarshal because of a type mismatch: %s to %s", rvp.Kind(), value.Type())
