@@ -1,0 +1,1 @@
+( //MAP //LIST ( //MAP "tests/must-parse/conf.d/file1.secl"/STRING: "!(nop)"/STRING "tests/must-parse/conf.d/file2.secl"/STRING: "key1: value1"/STRING "tests/must-parse/conf.d/file3.secl"/STRING: "key1: value2"/STRING "tests/must-parse/conf.d/file4.secl"/STRING: "key2: value3\n\nhello"/STRING "tests/must-parse/conf.d/file5.secl"/STRING: "key1: value4"/STRING //LIST ) )

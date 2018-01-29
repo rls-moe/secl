@@ -3,6 +3,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/pkg/errors"
 	"go.rls.moe/secl/lexer"
@@ -111,9 +112,44 @@ func loadd(list *types.MapList) (types.Value, error) {
 	if suffix.Type() != types.TString {
 		return nil, errors.New("Suffix must be a string")
 	}
+	var loader string
+	loaderML, ok := list.Map[types.String{Value: "parser"}]
+	if !ok {
+		loader = "secl"
+	} else {
+		loaderI, ok := loaderML.(*types.String)
+		if !ok {
+			return nil, errors.New("parser parameter must be a string")
+		}
+		loader = loaderI.Value
+	}
+	loader = strings.ToLower(loader)
 	files, err := filepath.Glob(filepath.Join(folder.(*types.String).Value, "*"+suffix.(*types.String).Value))
 	if err != nil {
 		return nil, err
+	}
+	if loader == "plain" {
+		var out = &types.MapList{
+			Map:  map[types.String]types.Value{},
+			List: []types.Value{},
+		}
+		for k := range files {
+			stat, err := os.Stat(files[k])
+			if err != nil {
+				return nil, err
+			}
+			if stat.IsDir() {
+				return nil, errors.New("plain parser does not read directories")
+			}
+			cnt, err := ioutil.ReadFile(files[k])
+			if err != nil {
+				return nil, err
+			}
+			out.Map[types.String{Value: files[k]}] = &types.String{
+				Value: string(cnt),
+			}
+		}
+		return out, nil
 	}
 	var out = &types.MapList{
 		Map: map[types.String]types.Value{},
@@ -123,11 +159,25 @@ func loadd(list *types.MapList) (types.Value, error) {
 		Executable: true,
 	}
 	for k := range files {
-		ml, err := subloadfile(files[k])
-		if err != nil {
-			return nil, errors.Wrapf(err, "Could not load file %s", files[k])
+		if loader == "secl" {
+			ml, err := subloadfile(files[k])
+			if err != nil {
+				return nil, errors.Wrapf(err, "Could not load file %s", files[k])
+			}
+			out.List = append(out.List, ml)
+		} else if f, ok := functions["__loadd_parser@"+loader]; ok {
+			l, err := f(&types.MapList{
+				List: []types.Value{
+					&types.String{Value: files[k]},
+				},
+			})
+			if err != nil {
+				return nil, err
+			}
+			out.List = append(out.List, l)
+		} else {
+			return nil, errors.New("Unknown parser " + loader)
 		}
-		out.List = append(out.List, ml)
 	}
 	return out, nil
 }

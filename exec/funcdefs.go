@@ -28,8 +28,12 @@ var functions = map[string]SECLFunc{
 	"loadv":  loadv,
 	"loadb":  loadb,
 	"loadf":  loadf,
-	"loadd":  loadd,
-	"merge":  merge,
+	// loadd is added in init() due to a initialization loop
+	"merge": merge,
+}
+
+func init() {
+	functions["loadd"] = loadd
 }
 
 // EvalMapList executes a MapList which has been marked executable with the correct function
