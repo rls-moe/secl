@@ -1,24 +1,45 @@
 package query
 
 import (
+	"reflect"
+	"strconv"
+	"strings"
+
 	"github.com/pkg/errors"
 	"go.rls.moe/secl/types"
-	"reflect"
-	"strings"
 )
 
-func PathToQuery(path string) []PathSegment {
+func PathToQuery(path string) ([]PathSegment, error) {
 	pathSegs := strings.Split(path, ".")
 	queries := []PathSegment{}
 	for k := range pathSegs {
-		queries = append(queries, KeySelect(pathSegs[k]))
+		var t PathSegment
+		var q = pathSegs[k]
+		if q == "#" {
+			t = NewOnlyMap()
+		} else if q == "[]" {
+			t = NewOnlyList()
+		} else if strings.HasPrefix(q, "[") {
+			i := strings.Trim(q, "[]")
+			in, err := strconv.Atoi(i)
+			if err != nil {
+				return nil, err
+			}
+			t = ListSelect(in)
+		} else {
+			t = KeySelect(q)
+		}
+		queries = append(queries, t)
 	}
-	return queries
+	return queries, nil
 }
 
 // SimpleUnmarshal will use a dot-seperated path to read keys from the map
 func SimpleUnmarshal(ml *types.MapList, target interface{}, path string) error {
-	queries := PathToQuery(path)
+	queries, err := PathToQuery(path)
+	if err != nil {
+		return err
+	}
 	if err := NewUnmarshalWithQuery(target, queries...).Run(ml); err != nil {
 		return errors.Wrapf(err, "Could not unwrap %s", path)
 	}
@@ -42,7 +63,10 @@ func SimpleStructUnmarshal(ml *types.MapList, target interface{}) error {
 			path = typeOfField.Name
 		}
 		if field.Kind() == reflect.Struct {
-			queryPath := PathToQuery(path)
+			queryPath, err := PathToQuery(path)
+			if err != nil {
+				return err
+			}
 			subTarget, err := NewQuery(queryPath...).Run(ml)
 			if err != nil {
 				return err
