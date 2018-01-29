@@ -13,6 +13,7 @@ import (
 // a minimal testcase
 
 type BugIssue4 struct {
+	DecoyS         string
 	BugIssue4Inner `secl:"bug4"`
 	Decoy          int
 }
@@ -30,13 +31,8 @@ func TestBugIssue4(t *testing.T) {
 	assert := assert.New(t)
 
 	testObj := new(BugIssue4)
-	secl := "(bug4: test)"
-	exptV := &types.MapList{
-		Map: map[types.String]types.Value{
-			types.String{Value: "bug4"}: &types.String{Value: "test"},
-		},
-		List: []types.Value{},
-	}
+	secl := "(bug4: test DecoyS: dec Decoy: 8)"
+	exptV := &types.String{Value: "test"}
 
 	ml, err := LoadConfig(secl)
 	if err != nil {

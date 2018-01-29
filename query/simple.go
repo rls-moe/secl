@@ -41,15 +41,19 @@ func SimpleUnmarshal(ml *types.MapList, target interface{}, path string) error {
 		return err
 	}
 	if err := NewUnmarshalWithQuery(target, queries...).Run(ml); err != nil {
-		return errors.Wrapf(err, "Could not unwrap %s", path)
+		return errors.Wrapf(err, "Could not unwrap '%s'", path)
 	}
 	return nil
 }
 
 // SimpleStructUnmarshal accepts a struct and will unmarshal the maplist using the struct tags
-func SimpleStructUnmarshal(ml *types.MapList, target interface{}) error {
-	if unmarshaller, ok := target.(SECLUnmarshal); ok {
-		return unmarshaller.UnmarshalSECL(ml)
+func SimpleStructUnmarshal(v types.Value, target interface{}) error {
+	ml, ok := v.(*types.MapList)
+	if !ok {
+		if unmarshaller, ok := target.(SECLUnmarshal); ok {
+			return unmarshaller.UnmarshalSECL(v)
+		}
+		return errors.New("tried to unpack non-maplist into struct without unmarshaller")
 	}
 	valueOfTarget := reflect.ValueOf(target).Elem()
 	typeOfTarget := reflect.TypeOf(target).Elem()
@@ -62,6 +66,7 @@ func SimpleStructUnmarshal(ml *types.MapList, target interface{}) error {
 		if path == "" {
 			path = typeOfField.Name
 		}
+
 		if field.Kind() == reflect.Struct {
 			queryPath, err := PathToQuery(path)
 			if err != nil {
@@ -71,11 +76,8 @@ func SimpleStructUnmarshal(ml *types.MapList, target interface{}) error {
 			if err != nil {
 				return err
 			}
-			mlSubTarget, ok := subTarget.(*types.MapList)
-			if !ok {
-				return errors.New("Struct Subtarget is not a map")
-			}
-			if err := SimpleStructUnmarshal(mlSubTarget, field.Addr().Interface()); err != nil {
+
+			if err := SimpleStructUnmarshal(subTarget, field.Addr().Interface()); err != nil {
 				return err
 			}
 			continue
@@ -83,6 +85,7 @@ func SimpleStructUnmarshal(ml *types.MapList, target interface{}) error {
 		if field.Kind() == reflect.Array || field.Kind() == reflect.Slice || field.Kind() == reflect.Map {
 			return errors.New("Cannot parse Maps, Arrays or Slices (yet)")
 		}
+
 		if err := SimpleUnmarshal(ml, field.Addr().Interface(), path); err != nil {
 			return err
 		}

@@ -172,6 +172,7 @@ func NewUnmarshal(target interface{}) Unmarshal {
 
 func (u Unmarshal) Select(value types.Value) (types.Value, error) {
 
+	// check if we can unpack directly
 	if v, ok := u.Target.(SECLUnmarshal); ok {
 		return nil, v.UnmarshalSECL(value)
 	}
@@ -180,12 +181,15 @@ func (u Unmarshal) Select(value types.Value) (types.Value, error) {
 		return v.Select(value)
 	}
 
+	// if we can't unpack directly, it must be a pointer value
 	rv := reflect.ValueOf(u.Target)
 
 	if rv.Kind() != reflect.Ptr || rv.IsNil() {
 		return nil, errors.Errorf("Expected a pointer not a %s for unmarshalling", rv.Kind().String())
 	}
+
 	rvp := reflect.Indirect(rv)
+
 	if rvp.Kind() == reflect.String && value.Type() == types.TString {
 		rvp.SetString(value.Literal())
 		return value, nil
