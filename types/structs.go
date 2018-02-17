@@ -87,9 +87,11 @@ var _ Value = &Float{} // Assert that Float is a Value
 
 // MapList is a combination of maps and lists into one entity. Keys must be a string
 type MapList struct {
-	Executable bool
-	Map        map[String]Value
-	List       []Value
+	Executable    bool
+	MergeUp       bool // indicates the map must be merged into the parent node
+	InterruptExec bool // if true, execution does not execute child nodes
+	Map           map[String]Value
+	List          []Value
 }
 
 var _ Value = &MapList{} // Assert that MapList is a Value

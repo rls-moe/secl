@@ -4,6 +4,7 @@ import (
 	"github.com/pkg/errors"
 	"go.rls.moe/secl/exec"
 	"go.rls.moe/secl/parser"
+	"go.rls.moe/secl/parser/context"
 	"go.rls.moe/secl/query"
 	"go.rls.moe/secl/types"
 )
@@ -44,7 +45,8 @@ func LoadConfig(config string) (*types.MapList, error) {
 	if err != nil {
 		return nil, err
 	}
-	ncfg, err := exec.Eval(cfg)
+	ctx := context.NewParserContext()
+	ncfg, err := exec.Eval(ctx.ToRuntime(), cfg)
 	if err != nil {
 		return nil, err
 	}

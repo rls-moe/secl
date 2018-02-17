@@ -38,7 +38,7 @@ func TestParseString(t *testing.T) {
 								Executable: true,
 								Map:        map[types.String]types.Value{},
 								List: []types.Value{
-									types.Function{Identifier: "nop"},
+									&types.String{Value: "nop"},
 								},
 							},
 							&types.Integer{Value: big.NewInt(88)},

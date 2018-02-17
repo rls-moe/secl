@@ -1,10 +1,11 @@
 package exec // import "go.rls.moe/secl/exec"
 import (
 	"github.com/pkg/errors"
+	"go.rls.moe/secl/parser/context"
 	"go.rls.moe/secl/types"
 )
 
-func merge(list *types.MapList) (types.Value, error) {
+func merge(ctx *context.Runtime, list *types.MapList) (types.Value, error) {
 	if len(list.Map) != 0 {
 		return nil, errors.New("merge does not accept map-key values as parameter")
 	}

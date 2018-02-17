@@ -2,11 +2,13 @@ package exec // import "go.rls.moe/secl/exec"
 
 import (
 	"encoding/base64"
+
 	"github.com/pkg/errors"
+	"go.rls.moe/secl/parser/context"
 	"go.rls.moe/secl/types"
 )
 
-func decb64(list *types.MapList) (types.Value, error) {
+func decb64(ctx *context.Runtime, list *types.MapList) (types.Value, error) {
 	var useURL = true
 	var useRaw = true
 

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"go.rls.moe/secl/parser/context"
 	"go.rls.moe/secl/types"
 )
 
@@ -11,7 +12,7 @@ const functionNameConvertType = "=>type"
 const functionNameConverTypeShort = "=>T"
 
 func init() {
-	fun := func(list *types.MapList) (types.Value, error) {
+	fun := func(ctx *context.Runtime, list *types.MapList) (types.Value, error) {
 		funName := list.List[0].(types.Function).Identifier
 
 		var (
@@ -53,6 +54,6 @@ func init() {
 		}
 		return types.CoerceType(val, targetTypeT)
 	}
-	RegisterFunction(functionNameConvertType, fun)
-	RegisterFunction(functionNameConverTypeShort, fun)
+	context.MustRegisterFunction(functionNameConvertType, fun)
+	context.MustRegisterFunction(functionNameConverTypeShort, fun)
 }

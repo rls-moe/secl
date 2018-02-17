@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.rls.moe/secl/exec"
+	"go.rls.moe/secl/parser/context"
 	"go.rls.moe/secl/types"
 )
 
@@ -78,7 +79,8 @@ func TestMustParse(t *testing.T) {
 			assert.Equal(types.PrintValue(ml), types.PrintValue(ml2), "Must match reproduced value")
 
 			if strings.HasSuffix(file.Name(), ".exec.secl") {
-				ml3, err := exec.Eval(ml)
+				ctx := context.NewParserContext()
+				ml3, err := exec.Eval(ctx.ToRuntime(), ml)
 				assert.NoError(err)
 
 				t.Logf("Output of Expanded Test %-36s: %s", file.Name(), types.PrintDebug(ml3))

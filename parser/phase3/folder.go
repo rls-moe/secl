@@ -2,7 +2,7 @@ package phase3 // import "go.rls.moe/secl/parser/phase3"
 
 import (
 	"github.com/pkg/errors"
-	"go.rls.moe/secl/lexer"
+	"go.rls.moe/secl/parser/context"
 	"go.rls.moe/secl/parser/phase1"
 	"go.rls.moe/secl/types"
 )
@@ -33,11 +33,12 @@ func (*p3Empty) Type() types.Type {
 //
 // This function will insert placeholder values, p3Empty{}, into any list item it folds into the map
 // to make the iteration easier. This means it is necessary to run Clean() afterwards.
-func Fold(maplist *types.MapList) error {
+func Fold(ctx *context.Parser, maplist *types.MapList) error {
+	c := ctx.ToPhase3()
 	for k := 0; k < len(maplist.List); k++ {
 		cur := maplist.List[k]
 		switch cur.Type() {
-		case lexer.TTModTrim:
+		case types.Type(c.Symbols.ModTrim):
 			panic("Wat")
 		case phase1.TMapExec:
 			if len(maplist.List) <= k+1 {
@@ -50,7 +51,7 @@ func Fold(maplist *types.MapList) error {
 			maplist.List[k] = &p3Empty{}
 		case types.TMapList:
 			mpl := cur.(*types.MapList)
-			if err := Fold(mpl); err != nil {
+			if err := Fold(ctx, mpl); err != nil {
 				return err
 			}
 			maplist.List[k] = mpl
@@ -61,7 +62,7 @@ func Fold(maplist *types.MapList) error {
 			nxt := maplist.List[k+1]
 			if nxt.Type() == types.TMapList {
 				mplnxt := nxt.(*types.MapList)
-				if err := Fold(mplnxt); err != nil {
+				if err := Fold(ctx, mplnxt); err != nil {
 					return err
 				}
 				nxt = mplnxt
@@ -74,7 +75,7 @@ func Fold(maplist *types.MapList) error {
 				if nxtnxt.Type() != types.TMapList {
 					return ErrExecNotMap
 				}
-				if err := Fold(nxtnxt.(*types.MapList)); err != nil {
+				if err := Fold(ctx, nxtnxt.(*types.MapList)); err != nil {
 					return err
 				}
 				nxtnxt.(*types.MapList).Executable = true

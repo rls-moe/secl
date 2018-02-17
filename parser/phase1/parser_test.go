@@ -1,15 +1,19 @@
 package phase1
 
 import (
-	"go.rls.moe/secl/lexer"
 	"io"
 	"testing"
+
+	"go.rls.moe/secl/lexer"
+	"go.rls.moe/secl/parser/context"
 )
 
 func TestPhase1Parser_Step(t *testing.T) {
+	ctx := context.NewParserContext()
+
 	input := "(test1:( hello test2: () test3: empty true test5: hallo ) off )"
 
-	p := NewParser(lexer.NewTokenizer(input))
+	p := NewParser(ctx, lexer.NewTokenizer(ctx, input))
 
 	for {
 		err := p.Step()

@@ -8,12 +8,13 @@ import (
 	"github.com/pkg/errors"
 	"go.rls.moe/secl/lexer"
 	"go.rls.moe/secl/parser"
+	"go.rls.moe/secl/parser/context"
 	"go.rls.moe/secl/parser/phase1"
 	"go.rls.moe/secl/types"
 )
 
 // loadv is a SECL Functions that loads a single value from a file, this is done by manually inducing the lexer and phase 1 parser, but not phase 2 and 3
-func loadv(list *types.MapList) (types.Value, error) {
+func loadv(ctx *context.Runtime, list *types.MapList) (types.Value, error) {
 	if len(list.List) != 2 {
 		return nil, errors.New("loadv requires and permits only 1 parameter")
 	}
@@ -23,8 +24,8 @@ func loadv(list *types.MapList) (types.Value, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "Error reading file for loadv")
 	}
-
-	parser := phase1.NewParser(lexer.NewTokenizer(string(data)))
+	defaultCtx := context.NewParserContext()
+	parser := phase1.NewParser(defaultCtx, lexer.NewTokenizer(defaultCtx, string(data)))
 	// Read 1 token
 	if err := parser.Step(); err != nil {
 		return nil, errors.Wrap(err, "Could not parse value in file")
@@ -55,7 +56,7 @@ func loadv(list *types.MapList) (types.Value, error) {
 	}
 }
 
-func loadb(list *types.MapList) (types.Value, error) {
+func loadb(ctx *context.Runtime, list *types.MapList) (types.Value, error) {
 	if len(list.List) != 2 {
 		return nil, errors.New("loadb requires and permits only 1 parameter")
 	}
@@ -89,7 +90,7 @@ func subloadfile(filename string) (types.Value, error) {
 	return parser.ParseString(string(data))
 }
 
-func loadf(list *types.MapList) (types.Value, error) {
+func loadf(ctx *context.Runtime, list *types.MapList) (types.Value, error) {
 	if len(list.List) != 2 {
 		return nil, errors.New("loadf requires and permits only 1 parameter")
 	}
@@ -97,7 +98,7 @@ func loadf(list *types.MapList) (types.Value, error) {
 	return subloadfile(list.List[1].Literal())
 }
 
-func loadd(list *types.MapList) (types.Value, error) {
+func loadd(ctx *context.Runtime, list *types.MapList) (types.Value, error) {
 	folder, ok := list.Map[types.String{Value: "dir"}]
 	if !ok {
 		folder = &types.String{Value: "./conf.d"}
@@ -165,8 +166,8 @@ func loadd(list *types.MapList) (types.Value, error) {
 				return nil, errors.Wrapf(err, "Could not load file %s", files[k])
 			}
 			out.List = append(out.List, ml)
-		} else if f, ok := functions["__loadd_parser@"+loader]; ok {
-			l, err := f(&types.MapList{
+		} else if f, ok := ctx.Functions["__loadd_parser@"+loader]; ok {
+			l, err := f(ctx, &types.MapList{
 				List: []types.Value{
 					&types.String{Value: files[k]},
 				},

@@ -5,11 +5,12 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"go.rls.moe/secl/parser/context"
 	"go.rls.moe/secl/types"
 )
 
 func init() {
-	RegisterFunction("env", func(list *types.MapList) (types.Value, error) {
+	context.MustRegisterFunction("env", func(ctx *context.Runtime, list *types.MapList) (types.Value, error) {
 		if len(list.List) != 2 {
 			return nil, errors.New("env needs 1 parameter")
 		}

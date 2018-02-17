@@ -2,6 +2,8 @@ package lexer
 
 import (
 	"testing"
+
+	"go.rls.moe/secl/parser/context"
 )
 
 func TestTokenizer_NextToken(t *testing.T) {
@@ -15,60 +17,61 @@ func TestTokenizer_NextToken(t *testing.T) {
 comment that
 should stop parsing here */ () 0xF 0x0 0b0 0b1 0o7 0o1`
 
+	ctx := context.NewParserContext()
 	tests := []struct {
-		expectedType    TokenType
+		expectedType    context.TokenType
 		expectedLiteral string
 		start, end      int
 	}{
-		{TTMapListBegin, "(", 0, 0},
-		{TTModExecMap, "!", 2, 2},
-		{TTMapListBegin, "(", 3, 3},
-		{TTFunction, "nop", 4, 6},
-		{TTMapListEnd, ")", 7, 7},
-		{TTSingleWordString, "let", 9, 11},
-		{TTModMapKey, ":", 12, 12},
-		{TTNumber, "909", 14, 16},
-		{TTSingleWordString, "other", 18, 22},
-		{TTModMapKey, ":", 23, 23},
-		{TTModTrim, "@", 24, 24},
-		{TTString, "test", 25, 30},
-		{TTSingleWordString, "k2", 32, 33},
-		{TTModMapKey, ":", 34, 34},
-		{TTString, "test\n\thello🤣🤣\\\"ttt", 36, 55},
-		{TTSingleWordString, "k3?", 57, 59},
-		{TTModMapKey, ":", 60, 60},
-		{TTSingleWordString, "k4!", 62, 64},
-		{TTSingleWordString, "decimal", 66, 72},
-		{TTModMapKey, ":", 73, 73},
-		{TTNumber, "0.111e-19*10^10", 75, 89},
-		{TTSingleWordString, "let2", 91, 94},
-		{TTModMapKey, ":", 95, 95},
-		{TTEmpty, "empty", 97, 101},
-		{TTSingleWordString, "let3", 103, 106},
-		{TTModMapKey, ":", 107, 107},
-		{TTNil, "nil", 109, 111},
-		{TTRandstr, "randstr128", 113, 122},
-		{TTFunction, "decb64", 124, 129},
-		{TTBool, "true", 131, 134},
-		{TTBool, "off", 136, 138},
-		{TTMapListEnd, ")", 140, 140},
-		{TTComment, "# This is a comment", 142, 160},
-		{TTComment, "; Also a comment", 162, 177},
-		{TTComment, "// Also a comment", 179, 195},
-		{TTSingleWordString, "/+notacomment", 197, 209},
-		{TTComment, "/* this is a ml\ncomment that\nshould stop parsing here */", 211, 266},
-		{TTMapListBegin, "(", 268, 268},
-		{TTMapListEnd, ")", 269, 269},
-		{TTNumber, "0xF", 271, 273},
-		{TTNumber, "0x0", 275, 277},
-		{TTNumber, "0b0", 279, 281},
-		{TTNumber, "0b1", 283, 285},
-		{TTNumber, "0o7", 287, 289},
-		{TTNumber, "0o1", 291, 293},
-		{TTEOF, "", 294, 294},
+		{ctx.Symbols.MapListBegin, "(", 0, 0},
+		{ctx.Symbols.ModExecMap, "!", 2, 2},
+		{ctx.Symbols.MapListBegin, "(", 3, 3},
+		{ctx.Symbols.SingleWordString, "nop", 4, 6},
+		{ctx.Symbols.MapListEnd, ")", 7, 7},
+		{ctx.Symbols.SingleWordString, "let", 9, 11},
+		{ctx.Symbols.ModMapKey, ":", 12, 12},
+		{ctx.Symbols.Number, "909", 14, 16},
+		{ctx.Symbols.SingleWordString, "other", 18, 22},
+		{ctx.Symbols.ModMapKey, ":", 23, 23},
+		{ctx.Symbols.ModTrim, "@", 24, 24},
+		{ctx.Symbols.String, "test", 25, 30},
+		{ctx.Symbols.SingleWordString, "k2", 32, 33},
+		{ctx.Symbols.ModMapKey, ":", 34, 34},
+		{ctx.Symbols.String, "test\n\thello🤣🤣\\\"ttt", 36, 55},
+		{ctx.Symbols.SingleWordString, "k3?", 57, 59},
+		{ctx.Symbols.ModMapKey, ":", 60, 60},
+		{ctx.Symbols.SingleWordString, "k4!", 62, 64},
+		{ctx.Symbols.SingleWordString, "decimal", 66, 72},
+		{ctx.Symbols.ModMapKey, ":", 73, 73},
+		{ctx.Symbols.Number, "0.111e-19*10^10", 75, 89},
+		{ctx.Symbols.SingleWordString, "let2", 91, 94},
+		{ctx.Symbols.ModMapKey, ":", 95, 95},
+		{ctx.Symbols.Empty, "empty", 97, 101},
+		{ctx.Symbols.SingleWordString, "let3", 103, 106},
+		{ctx.Symbols.ModMapKey, ":", 107, 107},
+		{ctx.Symbols.Nil, "nil", 109, 111},
+		{ctx.Symbols.Randstr, "randstr128", 113, 122},
+		{ctx.Symbols.SingleWordString, "decb64", 124, 129},
+		{ctx.Symbols.Bool, "true", 131, 134},
+		{ctx.Symbols.Bool, "off", 136, 138},
+		{ctx.Symbols.MapListEnd, ")", 140, 140},
+		{ctx.Symbols.Comment, "# This is a comment", 142, 160},
+		{ctx.Symbols.Comment, "; Also a comment", 162, 177},
+		{ctx.Symbols.Comment, "// Also a comment", 179, 195},
+		{ctx.Symbols.SingleWordString, "/+notacomment", 197, 209},
+		{ctx.Symbols.Comment, "/* this is a ml\ncomment that\nshould stop parsing here */", 211, 266},
+		{ctx.Symbols.MapListBegin, "(", 268, 268},
+		{ctx.Symbols.MapListEnd, ")", 269, 269},
+		{ctx.Symbols.Number, "0xF", 271, 273},
+		{ctx.Symbols.Number, "0x0", 275, 277},
+		{ctx.Symbols.Number, "0b0", 279, 281},
+		{ctx.Symbols.Number, "0b1", 283, 285},
+		{ctx.Symbols.Number, "0o7", 287, 289},
+		{ctx.Symbols.Number, "0o1", 291, 293},
+		{ctx.Symbols.EOF, "", 294, 294},
 	}
 
-	l := NewTokenizer(input)
+	l := NewTokenizer(ctx, input)
 	//t.Logf("Testing input: %q", input)
 	for i, tt := range tests {
 
@@ -91,17 +94,20 @@ should stop parsing here */ () 0xF 0x0 0b0 0b1 0o7 0o1`
 }
 
 func TestTokenizer_NextToken2(t *testing.T) {
+
+	ctx := context.NewParserContext()
+
 	input := `/* abort comment on eof`
 
 	tests := []struct {
-		expectedType    TokenType
+		expectedType    context.TokenType
 		expectedLiteral string
 		start, end      int
 	}{
-		{TTComment, "/* abort comment on eof", 0, -1},
+		{ctx.Symbols.Comment, "/* abort comment on eof", 0, -1},
 	}
 
-	l := NewTokenizer(input)
+	l := NewTokenizer(ctx, input)
 	for i, tt := range tests {
 
 		tok := l.NextToken()
@@ -121,17 +127,20 @@ func TestTokenizer_NextToken2(t *testing.T) {
 }
 
 func TestTokenizer_NextToken3(t *testing.T) {
+
+	ctx := context.NewParserContext()
+
 	input := `"abort string on eof`
 
 	tests := []struct {
-		expectedType    TokenType
+		expectedType    context.TokenType
 		expectedLiteral string
 		start, end      int
 	}{
-		{TTString, "abort string on eo", 0, -1},
+		{ctx.Symbols.String, "abort string on eo", 0, -1},
 	}
 
-	l := NewTokenizer(input)
+	l := NewTokenizer(ctx, input)
 	for i, tt := range tests {
 
 		tok := l.NextToken()
@@ -151,17 +160,20 @@ func TestTokenizer_NextToken3(t *testing.T) {
 }
 
 func TestTokenizer_NextToken4(t *testing.T) {
+
+	ctx := context.NewParserContext()
+
 	input := ` `
 
 	tests := []struct {
-		expectedType    TokenType
+		expectedType    context.TokenType
 		expectedLiteral string
 		start, end      int
 	}{
-		{TTEOF, "", 1, 1},
+		{ctx.Symbols.EOF, "", 1, 1},
 	}
 
-	l := NewTokenizer(input)
+	l := NewTokenizer(ctx, input)
 	for i, tt := range tests {
 
 		tok := l.NextToken()

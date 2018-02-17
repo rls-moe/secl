@@ -2,15 +2,9 @@ package exec // import "go.rls.moe/secl/exec"
 
 import (
 	"github.com/pkg/errors"
-	"go.rls.moe/secl/lexer"
+	"go.rls.moe/secl/parser/context"
 	"go.rls.moe/secl/types"
 )
-
-// SECLFunc is a generic function to be executed in a SECL file
-// It receives the maplist that contained the function
-// When it returns no error, it must return a non-nil types.Value entity that
-// replaces/expands the function position
-type SECLFunc func(list *types.MapList) (types.Value, error)
 
 // Errors returned by the EvalMapList function when running an executable map
 var (
@@ -20,25 +14,22 @@ var (
 	ErrNotExecutable   = errors.New("MapList is not marked executable")
 )
 
-var functions = map[string]SECLFunc{
-	"nop": func(list *types.MapList) (types.Value, error) {
-		return types.Nil{}, nil
-	},
-	"decb64": decb64,
-	"loadv":  loadv,
-	"loadb":  loadb,
-	"loadf":  loadf,
-	// loadd is added in init() due to a initialization loop
-	"merge": merge,
-}
-
 func init() {
-	functions["loadd"] = loadd
+	fn := context.MustRegisterFunction
+	fn("nop", func(ctx *context.Runtime, list *types.MapList) (types.Value, error) {
+		return types.Nil{}, nil
+	})
+	fn("decb64", decb64)
+	fn("loadv", loadv)
+	fn("loadb", loadb)
+	fn("loadf", loadf)
+	fn("loadd", loadd)
+	fn("merge", merge)
 }
 
 // EvalMapList executes a MapList which has been marked executable with the correct function
 // The first element of the list must be a Function type with a valid identifier
-func EvalMapList(list *types.MapList) (types.Value, error) {
+func EvalMapList(ctx *context.Runtime, list *types.MapList) (types.Value, error) {
 	if !list.Executable {
 		return nil, ErrNotExecutable
 	}
@@ -49,18 +40,20 @@ func EvalMapList(list *types.MapList) (types.Value, error) {
 		return nil, errors.Errorf("First element was not a function: %s", types.PrintValue(list.List[0]))
 	}
 	fnc := list.List[0].(types.Function)
-	fncCall, ok := functions[fnc.Identifier]
+	fncCall, ok := ctx.Functions[fnc.Identifier]
 	if !ok {
 		return nil, ErrUnknownFunction
 	}
 
-	return fncCall(list)
+	return fncCall(ctx, list)
 }
 
-func RegisterFunction(keyword string, fnc SECLFunc) error {
+/*
+func RegisterFunction(ctx context.Parser, keyword string, fnc SECLFunc) error {
 	if err := lexer.RegisterFunctionKeyword(keyword); err != nil {
 		return err
 	}
-	functions[keyword] = fnc
+	ctx.Functions[keyword] = fnc
 	return nil
 }
+*/

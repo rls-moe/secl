@@ -7,11 +7,12 @@ import (
 	"github.com/pkg/errors"
 	"go.rls.moe/secl/helper"
 	"go.rls.moe/secl/lexer"
+	"go.rls.moe/secl/parser/context"
 	"go.rls.moe/secl/types"
 )
 
 // AST is a shorthand for *rootNode, an internal type, which is exported here
-type AST rootNode
+type AST = rootNode
 
 // SubAST returns a subset of the AST, starting at <start> and going to <end> as if the notation a.FlatNodes[<start>:<end>]
 // was used. If start or end are -1, they are not inserted. Ex: start=-1 => a.FlatNodes[:<end>]
@@ -43,15 +44,18 @@ type Parser struct {
 	FlatAST *rootNode
 	// Tokenizer is the lexer to read from
 	Tokenizer *lexer.Tokenizer
+	// Parser Context
+	Context *context.ParserPhase1
 }
 
 // NewParser generates a new Phase 1 parser instance from the given lexer
-func NewParser(t *lexer.Tokenizer) *Parser {
+func NewParser(ctx *context.Parser, t *lexer.Tokenizer) *Parser {
 	return &Parser{
 		FlatAST: &rootNode{
 			FlatNodes: []types.Value{},
 		},
 		Tokenizer: t,
+		Context:   ctx.ToPhase1(),
 	}
 }
 
@@ -71,7 +75,7 @@ func (p *Parser) Step() error {
 	tok := p.Tokenizer.NextToken()
 
 	switch tok.Type {
-	case lexer.TTBool:
+	case p.Context.Symbols.Bool:
 		b := &types.Bool{}
 		if err := b.FromLiteral(tok.Literal); err != nil {
 			return err
@@ -79,47 +83,33 @@ func (p *Parser) Step() error {
 		if err := p.FlatAST.Append(b); err != nil {
 			return err
 		}
-	case lexer.TTEmpty:
+	case p.Context.Symbols.Empty:
 		if err := p.FlatAST.Append(EmptyMap{}); err != nil {
 			return err
 		}
-	case lexer.TTNil:
+	case p.Context.Symbols.Nil:
 		if err := p.FlatAST.Append(types.Nil{}); err != nil {
 			return err
 		}
-	case lexer.TTMapListBegin:
+	case p.Context.Symbols.MapListBegin:
 		if err := p.FlatAST.Append(MapBegin{}); err != nil {
 			return err
 		}
-	case lexer.TTMapListEnd:
+	case p.Context.Symbols.MapListEnd:
 		if err := p.FlatAST.Append(MapEnd{}); err != nil {
 			return err
 		}
-	case lexer.TTString:
-		s := &types.String{}
-		if err := s.FromLiteral(tok.Literal); err != nil {
-			return err
-		}
-		if err := p.FlatAST.Append(s); err != nil {
-			return err
-		}
-	case lexer.TTSingleWordString:
-		str := &types.String{}
-		if err := str.FromLiteral(tok.Literal); err != nil {
-			return err
-		}
-		if err := p.FlatAST.Append(str); err != nil {
+	case p.Context.Symbols.Number:
+		if p.Context.DisableNumericTypes {
+			s := &types.String{}
+			if err := s.FromLiteral(tok.Literal); err != nil {
+				return err
+			}
+			if err := p.FlatAST.Append(s); err != nil {
+				return err
+			}
 			return nil
 		}
-	case lexer.TTModExecMap:
-		p.FlatAST.Append(ExecMap{})
-	case lexer.TTFunction:
-		if err := p.FlatAST.Append(types.Function{
-			Identifier: tok.Literal,
-		}); err != nil {
-			return err
-		}
-	case lexer.TTNumber:
 		i := &types.Integer{}
 		err := i.FromLiteral(tok.Literal)
 		if err != nil {
@@ -135,7 +125,25 @@ func (p *Parser) Step() error {
 		} else if err := p.FlatAST.Append(i); err != nil {
 			return err
 		}
-	case lexer.TTModMapKey:
+	case p.Context.Symbols.String:
+		fallthrough
+	case p.Context.Symbols.SingleWordString:
+		str := &types.String{}
+		if err := str.FromLiteral(tok.Literal); err != nil {
+			return err
+		}
+		if err := p.FlatAST.Append(str); err != nil {
+			return nil
+		}
+	case p.Context.Symbols.ModExecMap:
+		p.FlatAST.Append(ExecMap{})
+	case p.Context.Symbols.Function:
+		if err := p.FlatAST.Append(types.Function{
+			Identifier: tok.Literal,
+		}); err != nil {
+			return err
+		}
+	case p.Context.Symbols.ModMapKey:
 		if err := p.FlatAST.ReplaceLast(func(in types.Value) (types.Value, error) {
 			if in.Type() != types.TString {
 				return nil, errors.Errorf("Wanted string AST node got %s", in.Type())
@@ -147,7 +155,7 @@ func (p *Parser) Step() error {
 		}); err != nil {
 			return errors.Wrap(err, "Could not replace value")
 		}
-	case lexer.TTRandstr:
+	case p.Context.Symbols.Randstr:
 		var length = 42
 		if strings.HasSuffix(tok.Literal, "32") {
 			length = 32
@@ -164,16 +172,16 @@ func (p *Parser) Step() error {
 		}); err != nil {
 			return err
 		}
-	case lexer.TTEOF:
+	case p.Context.Symbols.EOF:
 		return io.EOF
-	case lexer.TTModTrim:
+	case p.Context.Symbols.ModTrim:
 		p.FlatAST.ModNext = func(value types.Value) (types.Value, error) {
 			if value.Type() != types.TString {
 				return nil, errors.Errorf("TrimString modification was not followed by a string but by %s", value.Type())
 			}
 			return trimString(value.(*types.String)), nil
 		}
-	case lexer.TTComment:
+	case p.Context.Symbols.Comment:
 		return nil
 	default:
 		return errors.Errorf("Unknown Token %s: %+v", tok.Type, tok)

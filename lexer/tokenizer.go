@@ -3,6 +3,8 @@ package lexer // import "go.rls.moe/secl/lexer"
 import (
 	"fmt"
 	"unicode"
+
+	"go.rls.moe/secl/parser/context"
 )
 
 // The below is inspired by https://interpreterbook.com
@@ -17,12 +19,14 @@ type Tokenizer struct {
 	input     []rune
 	pos, rPos int
 	curRune   rune
+	ctx       *context.Lexer
 }
 
 // NewTokenizer creates a new Tokenizer based on the given string input
-func NewTokenizer(input string) *Tokenizer {
+func NewTokenizer(ctx *context.Parser, input string) *Tokenizer {
 	t := &Tokenizer{
 		input: []rune(input),
+		ctx:   ctx.ToLexer(),
 	}
 	t.readChar()
 	return t
@@ -54,22 +58,22 @@ func (t *Tokenizer) NextToken() Token {
 
 	switch t.curRune {
 	case '(':
-		tok = newToken(TTMapListBegin, t.curRune, t.pos, t.pos)
+		tok = newToken(t.ctx.Symbols.MapListBegin, t.curRune, t.pos, t.pos)
 	case ')':
-		tok = newToken(TTMapListEnd, t.curRune, t.pos, t.pos)
+		tok = newToken(t.ctx.Symbols.MapListEnd, t.curRune, t.pos, t.pos)
 	case '!':
-		tok = newToken(TTModExecMap, t.curRune, t.pos, t.pos)
+		tok = newToken(t.ctx.Symbols.ModExecMap, t.curRune, t.pos, t.pos)
 	case '@':
-		tok = newToken(TTModTrim, t.curRune, t.pos, t.pos)
+		tok = newToken(t.ctx.Symbols.ModTrim, t.curRune, t.pos, t.pos)
 	case ':':
-		tok = newToken(TTModMapKey, t.curRune, t.pos, t.pos)
+		tok = newToken(t.ctx.Symbols.ModMapKey, t.curRune, t.pos, t.pos)
 	case 0:
 		tok.Literal = ""
-		tok.Type = TTEOF
+		tok.Type = t.ctx.Symbols.EOF
 		tok.Start, tok.End = t.pos, t.pos
 	default:
 		if isValidCommentStarter(t.curRune) {
-			tok.Type = TTComment
+			tok.Type = t.ctx.Symbols.Comment
 			if t.curRune == '/' && t.peekChar() == '*' {
 				tok.Literal, tok.Start, tok.End = t.readMlComment()
 				t.readChar()
@@ -82,23 +86,23 @@ func (t *Tokenizer) NextToken() Token {
 		}
 		if isValidDigit(t.curRune) {
 			tok.Literal, tok.Start, tok.End = t.readNumber()
-			tok.Type = TTNumber
+			tok.Type = t.ctx.Symbols.Number
 			return tok
 		} else if isValidChunkRune(t.curRune) {
 			tok.Literal, tok.Start, tok.End = t.readChunk()
-			if kw, kwtt := resolveKeyword(tok.Literal); kw {
+			if kw, kwtt := t.resolveKeyword(tok.Literal); kw {
 				tok.Type = kwtt
 			} else {
-				tok.Type = TTSingleWordString
+				tok.Type = t.ctx.Symbols.SingleWordString
 			}
 			return tok
 		} else if isValidStringBorder(t.curRune) {
 			tok.Literal, tok.Start, tok.End = t.readString()
-			tok.Type = TTString
+			tok.Type = t.ctx.Symbols.String
 			return tok
 		}
 		fmt.Print("Illegal char at ", t.pos)
-		tok = newToken(TTIllegal, t.curRune, t.pos, t.pos)
+		tok = newToken(t.ctx.Symbols.Illegal, t.curRune, t.pos, t.pos)
 	}
 
 	t.readChar()
@@ -169,11 +173,11 @@ func (t *Tokenizer) skipWhitespace() {
 	}
 }
 
-func newToken(ttype TokenType, cr rune, start, end int) Token {
+func newToken(ttype context.TokenType, cr rune, start, end int) Token {
 	return Token{Type: ttype, Literal: string(cr), Start: start, End: end}
 }
 
-func resolveKeyword(chunk string) (bool, TokenType) {
-	tt, ok := keywords[chunk]
+func (t *Tokenizer) resolveKeyword(chunk string) (bool, context.TokenType) {
+	tt, ok := t.ctx.Keywords[chunk]
 	return ok, tt
 }
