@@ -1,10 +1,32 @@
 package query
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 	"go.rls.moe/secl/parser"
 )
+
+func TestMapUnpack(t *testing.T) {
+	assert := require.New(t)
+	ml, err := parser.ParseString(`
+		a: (
+			h1: h2
+			h3: h3
+			h5: h6
+		)
+		`)
+	assert.NoError(err)
+
+	var v map[string]string
+	err = NewUnmarshalWithQuery(&v, KeySelect("a")).Run(ml)
+	assert.NoError(err)
+	assert.EqualValues(map[string]string{
+		"h1": "h2",
+		"h3": "h3",
+		"h5": "h6",
+	}, v)
+}
 
 type UnmTest struct {
 	TestString   string
@@ -18,7 +40,7 @@ type UnmTest struct {
 func TestQuery(t *testing.T) {
 	assert := require.New(t)
 
-	ml,err := parser.ParseString(`a: (b: (c d yes) 8 9.91)`)
+	ml, err := parser.ParseString(`a: (b: (c d yes) 8 9.91)`)
 	assert.NoError(err)
 
 	test := UnmTest{}

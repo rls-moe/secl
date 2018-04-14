@@ -60,6 +60,9 @@ func SimpleStructUnmarshal(v types.Value, target interface{}) error {
 
 	for i := 0; i < valueOfTarget.NumField(); i++ {
 		field := valueOfTarget.Field(i)
+		if !field.CanSet() {
+			continue
+		}
 		typeOfField := typeOfTarget.Field(i)
 
 		path := typeOfField.Tag.Get("secl")
@@ -81,9 +84,10 @@ func SimpleStructUnmarshal(v types.Value, target interface{}) error {
 				return err
 			}
 			continue
-		}
-		if field.Kind() == reflect.Array || field.Kind() == reflect.Slice || field.Kind() == reflect.Map {
-			return errors.New("Cannot parse Maps, Arrays or Slices (yet)")
+		} else if field.Kind() == reflect.Array {
+			return errors.New("Cannot parse Arrays (yet)")
+		} else if field.Kind() == reflect.Slice {
+			return errors.New("Cannot parse Slices (yet)")
 		}
 
 		if err := SimpleUnmarshal(ml, field.Addr().Interface(), path); err != nil {

@@ -215,9 +215,63 @@ func (u Unmarshal) Select(value types.Value) (types.Value, error) {
 		f, _ := value.(*types.Float).Value.Float64()
 		rvp.SetFloat(f)
 		return value, nil
+	} else if rvp.Kind() == reflect.Map {
+		if rvp.IsNil() {
+			rvp.Set(reflect.MakeMap(rvp.Type()))
+			rvp = reflect.Indirect(rvp)
+		}
+		typeOfMap := rvp.Type()
+		if stMl, ok := value.(*types.MapList); !ok {
+			return nil, errors.New("Tried to unpack non-maplist into map[]")
+		} else {
+			keyType := typeOfMap.Key()
+			elemType := typeOfMap.Elem()
+			if keyType.Kind() != reflect.String {
+				return nil, errors.New("Maps must have key type string")
+			}
+			var mType = types.Type("")
+			for k, v := range stMl.Map {
+				if mType == types.Type("") {
+					mType = v.Type()
+				}
+				if v.Type() != mType {
+					return nil, errors.New("MapList not of consistent type")
+				}
+				if k.Type() != types.TString {
+					return nil, errors.New("MapList contained non-string key during map unpacking")
+				}
+				var elemData reflect.Value
+				q := valueOf(v)
+				if reflect.TypeOf(q).Kind() != elemType.Kind() {
+					return nil, errors.Errorf(
+						"map value datatype mismatch: have %s but wanted %s",
+						reflect.TypeOf(q).Kind(), elemType.Kind())
+				}
+				elemData = reflect.ValueOf(q)
+				rvp.SetMapIndex(reflect.ValueOf(k.Value), elemData)
+			}
+		}
+		return value, nil
 	}
 
 	return nil, errors.Errorf("Could not unmarshal because of a type mismatch: %s to %s", rvp.Kind(), value.Type())
+}
+
+func valueOf(v types.Value) interface{} {
+	switch q := v.(type) {
+	case *types.Integer:
+		return q.Value.Int64()
+	case *types.Float:
+		f, _ := q.Value.Float64()
+		return f
+	case *types.String:
+		return q.Value
+	case *types.Binary:
+		return q.Raw
+	case *types.Bool:
+		return q.Value
+	}
+	panic("Value was not extractable")
 }
 
 type SECLUnmarshal interface {
