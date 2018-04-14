@@ -38,11 +38,9 @@ key: (
 
 ## Project Status
 
-SECL is in Version "0.9.5".
+SECL is in Version "0.9.6".
 
-Most features are now part of the reference implementation in this repository. The last missing function is `loadd`, merge has been implemented recently.
-
-A non-formal specification can be found at [hackmd](https://hackmd.io/s/rylGmiXr-) or in this repository under SPECS.md (hackmd might be more up-to-date than SPECS.md)
+A non-formal specification can be found at in this repository under SPECS.md
 
 ## SECL vs JSON vs XML
 

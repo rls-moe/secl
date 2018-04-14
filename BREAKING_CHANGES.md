@@ -9,3 +9,5 @@
 ## v0.9.6
 
 * Version `v0.9.6` breaks all internal interfaces and some internal behaviour. Functions gain an additional parameter, a runtime context, which allows for dynamic runtime environments (including runtime-defined functions). SECL files should still be parsed as normal as the internal changes are not exposed. Internal packages may no longer have access to function definitions in tests if the exec package was not loaded (this affects the lexer and phase1 tests)
+
+* Maps will now be parsed in a rudamentary fashion, keys may only be strings and the MapList being unpacked must only have elements of one type, map[string]interface{} is not supported. Arrays remain unsupported
